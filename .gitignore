@@ -1,6 +1,10 @@
 # Prerequisites
 *.d
 
+# Temporary Files
+**tmp**
+matrix.txt
+
 # Object files
 *.o
 *.ko

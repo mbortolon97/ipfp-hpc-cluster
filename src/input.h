@@ -1,3 +1,6 @@
+#ifndef INPUT
+#define INPUT
+
 #include "matrix.h"
 
 /**********************************
@@ -13,7 +16,9 @@
 
 /* load a file matrix.txt which contains a sparse matrix */
 /* returns a pointer to a sparse_matrix */
-sparse_matrix* load_sparse_matrix(){};
+struct sparse_matrix *load_sparse_matrix();
 
 /* given a matrix, stores it in a out_matrix.txt file */
-void save_sparse_matrix(sparse_matrix *matrix){};
+void save_sparse_matrix(struct sparse_matrix *matrix);
+
+#endif
