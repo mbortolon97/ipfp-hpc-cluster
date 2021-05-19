@@ -1,8 +1,6 @@
 #ifndef INPUT
 #define INPUT
 
-#include "matrix.h"
-
 /**********************************
  * format of a matrix.txt file
  *
@@ -14,11 +12,36 @@
  * 
 **********************************/
 
+/* one element of the matrix */
+struct sparse_matrix_element
+{
+    int row;
+    int col;
+    float value;
+};
+
+/* a struct representing a sparse matrix */
+struct sparse_matrix
+{
+    int n_rows;
+    int n_cols;
+    int n_elements;
+    int *row_permutations;
+    int *col_permutations;
+    struct sparse_matrix_element *elements;
+};
+
 /* load a file matrix.txt which contains a sparse matrix */
 /* returns a pointer to a sparse_matrix */
 struct sparse_matrix *load_sparse_matrix();
 
+/* permute rows and columns */
+void permute_sparse_matrix(struct sparse_matrix *matrix);
+
 /* given a matrix, stores it in a out_matrix.txt file */
 void save_sparse_matrix(struct sparse_matrix *matrix);
+
+/* free memory in heap dedicated to the matrix */
+void free_sparse_matrix(struct sparse_matrix *matrix);
 
 #endif
