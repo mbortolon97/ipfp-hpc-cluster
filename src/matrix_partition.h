@@ -1,0 +1,1 @@
+void number_of_submatrices(int n_processes, int n_rows, int n_cols, int *subp_rows, int *subp_cols);
