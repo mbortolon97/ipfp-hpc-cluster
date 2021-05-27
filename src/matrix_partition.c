@@ -98,6 +98,7 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
     for (int i = 0; i < partition.subp_rows; i++) {
         for (int j = 0; j < partition.subp_cols; j++) {
             process_id = partition
+            process_id++;
         }
     }
 

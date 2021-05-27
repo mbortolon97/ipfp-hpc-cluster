@@ -29,6 +29,6 @@ struct double_sparse_matrix *load_double_sparse_matrix(const char *filename);
 /**
  * This function save to a file a double sparse matrix
 **/
-void save_double_sparse_matrix(double_sparse_matrix matrix);
+void save_double_sparse_matrix(const char *filename, double_sparse_matrix matrix);
 
 #endif

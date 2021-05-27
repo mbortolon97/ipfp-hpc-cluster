@@ -1,16 +1,6 @@
 #include "permutation.h"
 #include "sparse_matrix.h"
 
-typedef struct sparse_matrix_permutation_struct
-{
-    int n_rows;
-    int n_cols;
-    int[] row_permutations;
-    int[] col_permutations;
-    int[] inverse_row_permutations;
-    int[] inverse_col_permutations;
-} sparse_matrix_permutation;
-
 sparse_matrix_permutation create_sparse_matrix_random_permutation(const sparse_matrix matrix) {
     sparse_matrix_permutation permutation;
     permutation.n_rows = matrix.n_rows;

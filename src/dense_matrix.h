@@ -5,7 +5,7 @@ typedef struct dense_matrix_struct
 {
     int n_rows;
     int n_cols;
-    void[] matrix;
+    double[] matrix;
 } double_dense_matrix;
 
 /**
