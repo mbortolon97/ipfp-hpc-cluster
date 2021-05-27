@@ -4,6 +4,7 @@
 #include <time.h>
 
 int main(int argc, char** argv) {
+    srand(time(NULL));
     // Input ( read from the file - file format? )
     // Shuffle rows and columns (create map between origin and destination)
     // Compute the sub matrix divisions (greedy algorithm)
@@ -21,6 +22,10 @@ int main(int argc, char** argv) {
 	int world_size, world_rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+    if (world_rank == 0) {
+        
+    }
 	
     MPI_Finalize();
     return 1;
