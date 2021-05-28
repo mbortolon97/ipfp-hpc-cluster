@@ -8,7 +8,7 @@ typedef struct sparse_matrix_struct
     int n_elements;
     int[] rows;
     int[] cols;
-    void[] values;
+    double[] values;
 } double_sparse_matrix;
 
 /**
@@ -24,7 +24,7 @@ void clean_sparse_matrix(double_sparse_matrix* matrix);
 /**
  * This function load from a file a double sparse matrix
 **/
-struct double_sparse_matrix *load_double_sparse_matrix(const char *filename);
+struct double_sparse_matrix load_double_sparse_matrix(const char *filename);
 
 /**
  * This function save to a file a double sparse matrix

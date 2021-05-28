@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     // input data read from files.txt
     double_sparse_matrix* aggregate_visit_matrix;
     double_sparse_matrix* poi_marginals_matrix;
-    dense_matrix* cbg_marginals_matrix;
+    double_dense_matrix* cbg_marginals_matrix;
 
     // aggregate_visit_matrix  after beign permutated
     double_sparse_matrix* permutated_aggregate_visit_matrix;
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
         // permute and get partitions
         permutation = create_sparse_matrix_random_permutation(*aggregate_visit_matrix);
         permutated_aggregate_visit_matrix = permutate_double_sparse_matrix(permutation, *aggregate_visit_matrix);
-        partition = create_submatrix_partition(world_size, aggregate_visit_matrix->n_rows, aggregate_visit_matrix->n_cols); // TODO: missing (M)
+        partition = create_submatrix_partition(world_size, aggregate_visit_matrix->n_rows, aggregate_visit_matrix->n_cols);
 
         // send submatrices to other processes
         submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);  // TODO: missing (T)
@@ -64,15 +64,17 @@ int main(int argc, char** argv) {
     for (int i = 0; i < poi_marginals_matrix->n_cols; i++) {
         // vectors that will be used in IPFP (marginal sums of rows/cols)
 
-        dense_matrix poi_marginals_at_hour_responsible;
-        dense_matrix cbg_marginals_at_hour_responsible;
+        double_dense_matrix poi_marginals_at_hour_responsible;
+        double_dense_matrix cbg_marginals_at_hour_responsible;
 
         if (world_rank == 0) {
             // get the column, apply the same permutation as before, broadcast
-            dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);  // TODO: missing (M)
-            dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);  // TODO: missing (M)
-            dense_matrix cbg_marginals_at_hour = permutate_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm); //TODO: missing traspose
-            dense_matrix poi_marginals_at_hour = permutate_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
+            double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);  // TODO: missing (M)
+            double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);  // TODO: missing (M)
+            double_dense_matrix cbg_marginals_at_hour = permutate_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm); //TODO: missing traspose
+            double_dense_matrix poi_marginals_at_hour = permutate_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
+            clean_double_dense_matrix(poi_marginals_at_hour_not_perm);
+            clean_double_dense_matrix(cbg_marginals_at_hour_not_perm);
 
             distribute = distribute_dense_matrix(partition, poi_marginals_at_hour);  // TODO: missing (M)
             distribute = distribute_dense_matrix(partition, cbg_marginals_at_hour);  // TODO: missing (M)

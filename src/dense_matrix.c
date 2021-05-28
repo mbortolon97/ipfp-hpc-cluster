@@ -3,26 +3,28 @@
 /**
  * This function return a new dense matrix with the given size
  **/ 
-dense_matrix create_double_dense_matrix(int n_rows, int n_cols) {
-    dense_matrix matrix;
+double_dense_matrix create_double_dense_matrix(int n_rows, int n_cols) {
+    double_dense_matrix matrix;
 
     matrix.n_rows = n_rows;
     matrix.n_cols = n_cols;
     matrix.matrix = malloc(n_rows * n_cols * sizeof(double));
+
+    return matrix;
 }
 
 /**
  * This function free a dense matrix
 **/
-void clean_dense_matrix(dense_matrix matrix) {
-    free(matrix.matrix);
-    matrix.matrix = NULL;
+void clean_double_dense_matrix(double_dense_matrix* matrix) {
+    free(matrix->matrix);
+    matrix->matrix = NULL;
 }
 
 /**
  * This function load from a file a double dense matrix
 **/
-struct dense_matrix *load_double_dense_matrix(const char *filename) {
+struct double_dense_matrix load_double_dense_matrix(const char *filename) {
     int n_rows, n_cols;
 
     // load file

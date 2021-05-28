@@ -1,8 +1,8 @@
 #include "sparse_matrix.h"
 #include <stdio.h>
 
-sparse_matrix create_double_sparse_matrix(int n_rows, int n_cols, int n_elements) {
-    sparse_matrix matrix;
+double_sparse_matrix create_double_sparse_matrix(int n_rows, int n_cols, int n_elements) {
+    double_sparse_matrix matrix;
     
     matrix.n_rows = n_rows;
     matrix.n_cols = n_cols;
@@ -12,7 +12,7 @@ sparse_matrix create_double_sparse_matrix(int n_rows, int n_cols, int n_elements
     matrix.values = malloc(n_elements * sizeof(double));
 }
 
-void clean_sparse_matrix(sparse_matrix* matrix) {
+void clean_sparse_matrix(double_sparse_matrix* matrix) {
     free(matrix->rows);
     free(matrix->cols);
     free(matrix->values);
@@ -21,7 +21,19 @@ void clean_sparse_matrix(sparse_matrix* matrix) {
     matrix->values = NULL;
 }
 
-struct sparse_matrix* load_double_sparse_matrix(const char *filename)
+double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col) {
+    double_dense_matrix result_matrix = create_double_dense_matrix();
+    int i;
+    for (int i = 0; i < matrix.n_rows; i++) {
+        result_matrix.matrix[i] = 0;
+    }
+    for (i = 0; i < matrix.n_elements; i++) {
+        result_matrix.matrix[matrix.rows[i]] += (matrix.cols[i] == col) * matrix.values[i];
+    }
+    return result_matrix;
+}
+
+double_sparse_matrix load_double_sparse_matrix(const char *filename)
 {
     int n_rows, n_cols, n_elements, i;
 
@@ -37,7 +49,7 @@ struct sparse_matrix* load_double_sparse_matrix(const char *filename)
 
     fscanf(in_file, "%d %d %d", &n_rows, &n_cols, &n_elements);
 
-    loaded_matrix = create_sparse_matrix(n_rows, n_cols, n_elements);
+    double_sparse_matrix loaded_matrix = create_double_sparse_matrix(n_rows, n_cols, n_elements);
 
     // read each element of the matrix
     for (i = 0; i < n_elements; i++)
@@ -56,7 +68,7 @@ struct sparse_matrix* load_double_sparse_matrix(const char *filename)
     return loaded_matrix;
 }
 
-void save_double_sparse_matrix(const char *filename, sparse_matrix matrix)
+void save_double_sparse_matrix(const char *filename, double_sparse_matrix matrix)
 {
     FILE *out_file = fopen(filename, "w+");
 
