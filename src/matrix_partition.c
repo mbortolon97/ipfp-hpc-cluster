@@ -94,13 +94,71 @@ submatrix_partition number_of_submatrices(int n_processes, int n_rows, int n_col
 submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int n_cols) {
     submatrix_partition partition = number_of_submatrices(n_processes, n_rows, n_cols);
 
+    partition.assignments = malloc(n_processes * sizeof(submatrix_assignment));
+    partition.col_master = malloc(partition.subp_cols * sizeof(submatrix_col_master));
+    partition.row_master = malloc(partition.subp_rows * sizeof(submatrix_row_master));
+
     int process_id = 0;
-    for (int i = 0; i < partition.subp_rows; i++) {
-        for (int j = 0; j < partition.subp_cols; j++) {
-            process_id = partition
+    int n_rows_per_process = n_rows / partition.subp_rows;
+    int n_cols_per_process = n_cols / partition.subp_cols;
+    
+    int i, j;
+    for (i = 0; i < partition.subp_rows; i++) {
+        partition.row_master[i].start_row = n_rows_per_process * i;
+        partition.row_master[i].stop_row = n_rows_per_process * (i + 1);
+        partition.row_master[i].row_master_process_id = -1;
+        partition.row_master[i].num_subprocesses = 0;
+        partition.row_master[i].row_processes_id = malloc(partition.subp_cols * sizeof(int));
+    }
+    for (j = 0; j < partition.subp_cols; j++) {
+        partition.col_master[j].start_col = n_cols_per_process * j;
+        partition.col_master[j].stop_col = n_cols_per_process * (j + 1);
+        partition.col_master[j].col_master_process_id = -1;
+        partition.col_master[j].num_subprocesses = 0;
+        partition.col_master[j].col_processes_id = malloc(partition.subp_rows * sizeof(int));
+    }
+    for (i = 0; i < partition.subp_rows; i++) {
+
+        for (j = 0; j < partition.subp_cols; j++) {
+            if (partition.row_master[i].row_master_process_id == -1) {
+                partition.row_master[i].row_master_process_id = process_id;
+            } else {
+                partition.row_master[i].row_processes_id[partition.row_master[i].num_subprocesses] = process_id;
+                partition.row_master[i].num_subprocesses++;
+            }
+            if (partition.col_master[j].col_master_process_id == -1) {
+                partition.col_master[j].col_master_process_id = process_id;
+            } else {
+                partition.col_master[j].col_processes_id[partition.row_master[j].num_subprocesses] = process_id;
+                partition.col_master[j].num_subprocesses++;
+            }
+            partition.assignments[process_id].start_row = n_rows_per_process * i;
+            partition.assignments[process_id].stop_row = n_rows_per_process * (i + 1);
+            partition.assignments[process_id].start_col = n_cols_per_process * j;
+            partition.assignments[process_id].stop_col = n_cols_per_process * (j + 1);
+
+            partition.col_responsible = partition.col_master[j].col_master_process_id;
+            partition.row_responsible = partition.row_master[i].row_master_process_id;
             process_id++;
         }
     }
 
     return partition;
+}
+
+void clean_submatrix_partition(submatrix_partition* partition) {
+    free(partition->assignments);
+    int i;
+    for (i = 0; i < partition.subp_rows; i++) {
+        free(partition->row_master[i].row_processes_id);
+    }
+    for (i = 0; i < partition.subp_cols; i++) {
+        free(partition.col_master[i].col_processes_id);
+    }
+    free(partition.col_master);
+    free(partition.row_master);
+}
+
+uint8_t inline check_if_inside_submatrix(submatrix_assignment assignment, int row, int col) {
+    return (row > assignment.start_row && row < assignment.stop_row && col > assignment.start_col && col < assignment.stop_col) * (uint8_t)1;
 }
