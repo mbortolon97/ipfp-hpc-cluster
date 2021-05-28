@@ -3,7 +3,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define NUM_ITERATIONS 100
+
 int main(int argc, char** argv) {
+    srand(time(NULL));
     // Input ( read from the file - file format? )
     // Shuffle rows and columns (create map between origin and destination)
     // Compute the sub matrix divisions (greedy algorithm)
@@ -21,6 +24,120 @@ int main(int argc, char** argv) {
 	int world_size, world_rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    
+    // input data read from files.txt
+    double_sparse_matrix aggregate_visit_matrix;
+    double_sparse_matrix poi_marginals_matrix;
+    double_dense_matrix cbg_marginals_matrix;
+
+    // aggregate_visit_matrix  after beign permutated
+    double_sparse_matrix* permutated_aggregate_visit_matrix;
+
+    // the permutation used
+    sparse_matrix_permutation permutation;
+
+    // restructuring sparse_matrix_permutation to send it through MPI
+    submatrix_partition partition;
+
+    // submatrix where the processes will work on
+    submatrix submatrix_to_elaborate;
+
+    if (world_rank == 0) {
+        // load matrices from files
+        aggregate_visit_matrix = load_double_sparse_matrix("aggregate_visit_matrix.txt");
+        poi_marginals_matrix = load_double_sparse_matrix("poi_marginals_2020_03_02.txt");
+        cbg_marginals_matrix = load_double_dense_matrix("cbg_marginals_2020_03_02.txt");
+
+        // permute and get partitions
+        permutation = create_sparse_matrix_random_permutation(*aggregate_visit_matrix);
+        permutated_aggregate_visit_matrix = permutate_double_sparse_matrix(permutation, *aggregate_visit_matrix);
+        partition = create_submatrix_partition(world_size, aggregate_visit_matrix->n_rows, aggregate_visit_matrix->n_cols);
+
+        // send submatrices to other processes
+        submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);  // TODO: missing (T)
+    } else {
+        // receive submatrix from process_0
+        submatrix_to_elaborate = wait_for_data(); // TODO: missing (T)
+    }
+
+    // for every hour compute IPFP
+    for (int i = 0; i < poi_marginals_matrix->n_cols; i++) {
+        // vectors that will be used in IPFP (marginal sums of rows/cols)
+
+        double_dense_matrix poi_marginals_at_hour_responsible;
+        double_dense_matrix cbg_marginals_at_hour_responsible;
+
+        if (world_rank == 0) {
+            // get the column, apply the same permutation as before, broadcast
+            double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);
+            double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);
+            double_dense_matrix cbg_marginals_at_hour = permutate_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm);
+            double_dense_matrix poi_marginals_at_hour = permutate_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
+            clean_double_dense_matrix(poi_marginals_at_hour_not_perm);
+            clean_double_dense_matrix(cbg_marginals_at_hour_not_perm);
+
+            distribute = distribute_dense_matrix(partition, poi_marginals_at_hour);  // TODO: missing (M)
+            distribute = distribute_dense_matrix(partition, cbg_marginals_at_hour);  // TODO: missing (M)
+        } else {
+            // receive broadcast
+            if (col_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+                poi_marginals_at_hour_responsible = receive_dense_matrix(); // TODO: missing (M)
+            }
+            if (row_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+                cbg_marginals_at_hour_responsible = receive_dense_matrix(); // TODO: missing (M)
+            }
+        }
+        // create a copy of the submatrix (one copy fo each hour) 
+        submatrix working_submatrix = clone_submatrix(submatrix_to_elaborate); // TODO: missing (T)
+
+        for (int i = 0; i < NUM_ITERATIONS; i++) {
+            if (i % 2 == 1) {
+                // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
+                dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix); // TODO: missing (M)
+                dense_matrix alfa_i;
+                if (row_responsible(working_submatrix, world_rank) == 0) {  // TODO: missing (T)
+                    dense_matrix aggregate_results = aggregate_sum_results(sum_result);  // TODO: missing
+                    // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
+                    set_to_one_less_than_epsilon(aggregate_results); // TODO: missing (M)
+                    // alfa_i = cbg_marginals_u / last_w_axis_sum
+                    alfa_i = elementwise_division(cbg_marginals_at_hour, aggregate_results); // TODO: missing
+                    distribute_coefficient_results(alfa_i); // TODO: missing
+                } else {
+                    send_sum_results(sum_result);  // TODO: missing
+                    alfa_i = receive_aggregate_sum_results(alfa_i);  // TODO: missing
+                }
+                // new_w = sparse_dense_vector_mul(last_w, alfa_i)
+                multiply_coefficient_by_cols(alfa_i, working_submatrix); // TODO: missing
+            } else {
+                // last_w_axis_sum = torch.sparse.sum(last_w, dim=1).to_dense()
+                dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix);
+                dense_matrix alfa_i;
+                if (col_responsible(working_submatrix, world_rank) == 0) {  // TODO: missing (T)
+                    dense_matrix aggregate_results = aggregate_sum_results(sum_result); // TODO: missing
+                    // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
+                    set_to_one_less_than_epsilon(aggregate_results); // TODO: missing (M)
+                    // alfa_i = cbg_marginals_u / last_w_axis_sum
+                    alfa_i = elementwise_division(poi_marginals_at_hour, aggregate_results); // TODO: missing
+                    distribute_coefficient_results(alfa_i); // TODO: missing
+                } else {
+                    send_sum_results(sum_result); // TODO: missing
+                    alfa_i = receive_aggregate_sum_results(alfa_i); // TODO: missing
+                }
+                // new_w = sparse_dense_vector_mul(last_w, alfa_i)
+                // TODO: missing
+                multiply_coefficient_by_rows(alfa_i, working_submatrix); // TODO: check if necessary two separate function for row and column
+            }
+        }
+        if (world_rank == 0) {
+            // process_0 receives the submatrices, undo the permutations and store the result on a file
+            double_sparse_matrix permutated_corrected_matrix = group_submatrixes(working_submatrix); // TODO: missing (T)
+            double_sparse_matrix corrected_matrix = inverse_matrix_permutation(permutation, working_submatrix); // TODO: missing (M)
+            save_double_sparse_matrix(sprinf("save_result_%d.txt", i), corrected_matrix);
+        } else {
+            // the other process send the submatrices to the main process
+            send_submatrixes(working_submatrix); // TODO: missing (T)
+        }
+    }
 	
     MPI_Finalize();
     return 1;

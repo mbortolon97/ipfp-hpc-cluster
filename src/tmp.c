@@ -4,6 +4,8 @@
 
 int main()
 {
+    srand(time(NULL));
+    
     MPI_Init(NULL, NULL);
     setbuf(stdout, NULL);
 
