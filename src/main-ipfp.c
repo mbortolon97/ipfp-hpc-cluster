@@ -26,9 +26,9 @@ int main(int argc, char** argv) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     
     // input data read from files.txt
-    double_sparse_matrix* aggregate_visit_matrix;
-    double_sparse_matrix* poi_marginals_matrix;
-    double_dense_matrix* cbg_marginals_matrix;
+    double_sparse_matrix aggregate_visit_matrix;
+    double_sparse_matrix poi_marginals_matrix;
+    double_dense_matrix cbg_marginals_matrix;
 
     // aggregate_visit_matrix  after beign permutated
     double_sparse_matrix* permutated_aggregate_visit_matrix;
@@ -69,9 +69,9 @@ int main(int argc, char** argv) {
 
         if (world_rank == 0) {
             // get the column, apply the same permutation as before, broadcast
-            double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);  // TODO: missing (M)
-            double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);  // TODO: missing (M)
-            double_dense_matrix cbg_marginals_at_hour = permutate_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm); //TODO: missing traspose
+            double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);
+            double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);
+            double_dense_matrix cbg_marginals_at_hour = permutate_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm);
             double_dense_matrix poi_marginals_at_hour = permutate_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
             clean_double_dense_matrix(poi_marginals_at_hour_not_perm);
             clean_double_dense_matrix(cbg_marginals_at_hour_not_perm);

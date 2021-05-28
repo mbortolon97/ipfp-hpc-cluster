@@ -21,6 +21,14 @@ void clean_double_dense_matrix(double_dense_matrix* matrix) {
     matrix->matrix = NULL;
 }
 
+double_dense_matrix get_row_from_dense(double_dense_matrix matrix, int row) {
+    double_dense_matrix result_matrix = create_double_dense_matrix(1, matrix.n_cols);
+    for (i = 0; i < matrix.n_cols; i++) {
+        result_matrix.matrix[i] = matrix.matrix[row * n_cols + i];
+    }
+    return result_matrix;
+}
+
 /**
  * This function load from a file a double dense matrix
 **/

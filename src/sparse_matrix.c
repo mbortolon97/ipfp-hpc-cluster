@@ -22,7 +22,7 @@ void clean_sparse_matrix(double_sparse_matrix* matrix) {
 }
 
 double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col) {
-    double_dense_matrix result_matrix = create_double_dense_matrix();
+    double_dense_matrix result_matrix = create_double_dense_matrix(matrix.n_rows, 1);
     int i;
     for (int i = 0; i < matrix.n_rows; i++) {
         result_matrix.matrix[i] = 0;

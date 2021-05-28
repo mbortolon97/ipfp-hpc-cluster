@@ -28,4 +28,9 @@ double_dense_matrix load_double_dense_matrix(const char *filename);
  **/ 
 double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col);
 
+/**
+ * This function get a row as a dense matrix
+ **/
+double_dense_matrix get_row_from_dense(double_dense_matrix matrix, int row);
+
 #endif
