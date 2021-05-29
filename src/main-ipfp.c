@@ -47,10 +47,7 @@ int main(int argc, char** argv) {
     submatrix_partition partition; 
     
     // submatrix where the processes will work on
-    /**
-     * TODO: Remove comment after debug
-    **/
-    // submatrix submatrix_to_elaborate;
+    submatrix submatrix_to_elaborate;
 
     if (world_rank == 0) {
         // load matrices from files
@@ -62,9 +59,7 @@ int main(int argc, char** argv) {
         permutation = create_sparse_matrix_random_permutation(aggregate_visit_matrix);
         permutated_aggregate_visit_matrix = permutate_double_sparse_matrix(permutation, aggregate_visit_matrix);
         partition = create_submatrix_partition(world_size, aggregate_visit_matrix.n_rows, aggregate_visit_matrix.n_cols);
-    }
 
-    /**
         // send submatrices to other processes
         submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);  // TODO: missing (T)
     } else {
@@ -171,8 +166,6 @@ int main(int argc, char** argv) {
         clean_sparse_matrix(&poi_marginals_matrix);
         clean_double_dense_matrix(&cbg_marginals_matrix);
     }
-
-    **/
 	
     MPI_Finalize();
     return 1;
