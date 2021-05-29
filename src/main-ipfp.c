@@ -10,6 +10,10 @@
 #define NUM_ITERATIONS 100
 
 int main(int argc, char** argv) {
+    if (argc != 4) {
+        printf("Usage: distributedIPFP [aggregate_visit_matrix] [week_poi_marginals] [week_cbg_marginals]\n");
+        exit(1);
+    }
     srand(time(NULL));
     // Input ( read from the file - file format? )
     // Shuffle rows and columns (create map between origin and destination)
@@ -48,9 +52,9 @@ int main(int argc, char** argv) {
 
     if (world_rank == 0) {
         // load matrices from files
-        aggregate_visit_matrix = load_double_sparse_matrix("aggregate_visit_matrix.txt");
-        poi_marginals_matrix = load_double_sparse_matrix("poi_marginals_2020_03_02.txt");
-        cbg_marginals_matrix = load_double_dense_matrix("cbg_marginals_2020_03_02.txt");
+        aggregate_visit_matrix = load_double_sparse_matrix(argv[1]);
+        poi_marginals_matrix = load_double_sparse_matrix(argv[2]);
+        cbg_marginals_matrix = load_double_dense_matrix(argv[3]);
 
         // permute and get partitions
         permutation = create_sparse_matrix_random_permutation(aggregate_visit_matrix);
