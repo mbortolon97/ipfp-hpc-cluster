@@ -38,8 +38,10 @@ submatrix distribute_sparse_matrix(submatrix_partition partition, double_sparse_
 submatrix wait_for_sparse_matrix();
 
 // operations on submatrices
+double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix);
+double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix);
 
-
-
+void multiply_coefficient_by_cols(const double_dense_matrix alfa_i, submatrix working_submatrix);
+void multiply_coefficient_by_rows(const double_dense_matrix alfa_i, submatrix working_submatrix);
 
 #endif
