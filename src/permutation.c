@@ -1,7 +1,9 @@
 #include "permutation.h"
 #include "sparse_matrix.h"
 
-sparse_matrix_permutation create_sparse_matrix_random_permutation(const sparse_matrix matrix) {
+#include <stdlib.h>
+
+sparse_matrix_permutation create_sparse_matrix_random_permutation(const double_sparse_matrix matrix) {
     sparse_matrix_permutation permutation;
     permutation.n_rows = matrix.n_rows;
     permutation.n_cols = matrix.n_cols;
@@ -34,8 +36,8 @@ void clean_sparse_matrix_permutation(sparse_matrix_permutation* permutation) {
     permutation->inverse_col_permutations = NULL;
 }
 
-sparse_matrix permutate_double_sparse_matrix(const sparse_matrix_permutation permutation, const sparse_matrix matrix) {
-    sparse_matrix permutated_matrix = create_double_sparse_matrix(matrix.n_rows, matrix.n_cols, matrix.n_elements);
+double_sparse_matrix permutate_double_sparse_matrix(const sparse_matrix_permutation permutation, const double_sparse_matrix matrix) {
+    double_sparse_matrix permutated_matrix = create_double_sparse_matrix(matrix.n_rows, matrix.n_cols, matrix.n_elements);
     int i;
     for (i = 0; i < matrix.n_elements; i++) {
         permutated_matrix.rows[i] = permutation.row_permutations[matrix.rows[i]];
@@ -45,8 +47,8 @@ sparse_matrix permutate_double_sparse_matrix(const sparse_matrix_permutation per
     return permutated_matrix;
 }
 
-dense_matrix permutate_dense_matrix_along_columns(const sparse_matrix_permutation permutation, const dense_matrix matrix) {
-    dense_matrix permutated_matrix = create_double_dense_matrix(matrix.n_rows, matrix.n_cols);
+double_dense_matrix permutate_dense_matrix_along_columns(const sparse_matrix_permutation permutation, const double_dense_matrix matrix) {
+    double_dense_matrix permutated_matrix = create_double_dense_matrix(matrix.n_rows, matrix.n_cols);
 
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
@@ -58,8 +60,8 @@ dense_matrix permutate_dense_matrix_along_columns(const sparse_matrix_permutatio
     return permutated_matrix;
 }
 
-dense_matrix permutate_dense_matrix_along_rows(const sparse_matrix_permutation permutation, const dense_matrix matrix) {
-    dense_matrix permutated_matrix = create_double_dense_matrix(matrix.n_rows, matrix.n_cols);
+double_dense_matrix permutate_dense_matrix_along_rows(const sparse_matrix_permutation permutation, const double_dense_matrix matrix) {
+    double_dense_matrix permutated_matrix = create_double_dense_matrix(matrix.n_rows, matrix.n_cols);
 
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
@@ -68,5 +70,16 @@ dense_matrix permutate_dense_matrix_along_rows(const sparse_matrix_permutation p
         }
     }
 
+    return permutated_matrix;
+}
+
+double_sparse_matrix inverse_sparse_matrix_permutation(const sparse_matrix_permutation permutation, const double_sparse_matrix matrix) {
+    double_sparse_matrix permutated_matrix = create_double_sparse_matrix(matrix.n_rows, matrix.n_cols, matrix.n_elements);
+    int i;
+    for (i = 0; i < matrix.n_elements; i++) {
+        permutated_matrix.rows[i] = permutation.inverse_row_permutations[matrix.rows[i]];
+        permutated_matrix.cols[i] = permutation.inverse_col_permutations[matrix.cols[i]];
+        permutated_matrix.values[i] = matrix.values[i];
+    }
     return permutated_matrix;
 }
