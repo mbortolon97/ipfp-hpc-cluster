@@ -5,7 +5,7 @@ typedef struct dense_matrix_struct
 {
     int n_rows;
     int n_cols;
-    double[] matrix;
+    double* matrix;
 } double_dense_matrix;
 
 /**
@@ -24,13 +24,18 @@ void clean_double_dense_matrix(double_dense_matrix* matrix);
 double_dense_matrix load_double_dense_matrix(const char *filename);
 
 /**
- * This function extract as a dense matrix a column
- **/ 
-double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col);
-
-/**
  * This function get a row as a dense matrix
  **/
 double_dense_matrix get_row_from_dense(double_dense_matrix matrix, int row);
+
+/**
+ * This function set to one all the value below epsilon, work in place
+ **/
+void set_to_one_less_than_epsilon(double_dense_matrix matrix);
+
+/**
+ * This function divide two dense array element wise
+**/
+double_dense_matrix elementwise_division(const double_dense_matrix matrix1, const double_dense_matrix matrix2);
 
 #endif

@@ -1,5 +1,6 @@
 #include "sparse_matrix.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 double_sparse_matrix create_double_sparse_matrix(int n_rows, int n_cols, int n_elements) {
     double_sparse_matrix matrix;
@@ -59,9 +60,9 @@ double_sparse_matrix load_double_sparse_matrix(const char *filename)
         double value;
         fscanf(in_file, "%d %d %lf", &row, &col, &value);
 
-        matrix.rows[i] = row;
-        matrix.cols[i] = col;
-        matrix.values[i] = value;
+        loaded_matrix.rows[i] = row;
+        loaded_matrix.cols[i] = col;
+        loaded_matrix.values[i] = value;
     }
     fclose(in_file);
 
