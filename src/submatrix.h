@@ -1,18 +1,17 @@
-#include "matrix_partition.h"
-#include <mpi.h>
-
 #ifndef __SUBMATRIX_H
 #define __SUBMATRIX_H 1
 
+#include "sparse_matrix.h"
+#include "matrix_partition.h"
 
-struct mpi_sparse_matrix_element {
+struct mpi_matrix_element {
     int row, col;
     double val;
 };
 
 typedef struct submatrix_queue_struct{
-    submatrix_queue* next;
-    struct mpi_sparse_matrix_element* element;
+    struct submatrix_queue_struct* next;
+    struct mpi_matrix_element* element;
 } submatrix_queue;
 
 typedef struct submatrix_struct
@@ -23,7 +22,7 @@ typedef struct submatrix_struct
         int stop_col;
         
         int n_elements;
-        struct mpi_sparse_matrix_element* elements;
+        struct mpi_matrix_element* elements;
 
         int col_responsible;
         int row_responsible;
