@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "submatrix.h"
 
 #define NUM_ITERATIONS 100
 
@@ -54,10 +55,10 @@ int main(int argc, char** argv) {
         partition = create_submatrix_partition(world_size, aggregate_visit_matrix->n_rows, aggregate_visit_matrix->n_cols);
 
         // send submatrices to other processes
-        submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);  // TODO: missing (T)
+        submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);  // TODO: missing (T) // permutated_aggregate_visit_matrix?
     } else {
         // receive submatrix from process_0
-        submatrix_to_elaborate = wait_for_data(); // TODO: missing (T)
+        submatrix_to_elaborate = wait_for_sparse_matrix(); // TODO: missing (T)
     }
 
     // for every hour compute IPFP
