@@ -1,2 +1,7 @@
+#ifndef __MESSAGE_TAG_H
+#define __MESSAGE_TAG_H 1
+
 #define SEND_DENSE_MATRIX_DIMENSION 0
 #define SEND_DENSE_MATRIX_CONTENT 1
+
+#endif
