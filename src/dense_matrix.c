@@ -1,4 +1,5 @@
 #include "dense_matrix.h"
+#include <assert.h>
 
 /**
  * This function return a new dense matrix with the given size
@@ -26,6 +27,34 @@ double_dense_matrix get_row_from_dense(double_dense_matrix matrix, int row) {
     for (i = 0; i < matrix.n_cols; i++) {
         result_matrix.matrix[i] = matrix.matrix[row * n_cols + i];
     }
+    return result_matrix;
+}
+
+void set_to_one_less_than_epsilon(double_dense_matrix matrix) {
+    int i, j;
+    for (i = 0; i < matrix.n_rows; i++) {
+        for (j = 0; j < matrix.n_cols; j++) {
+            matrix.matrix[i * n_cols + j] = matrix.matrix[i * n_cols + j] < DBL_EPSILON * 1.0 + matrix.matrix[i * n_cols + j] > DBL_EPSILON * matrix.matrix[i * n_cols + j];
+        }
+    }
+}
+
+/**
+ * This function divide two dense array element wise
+**/
+double_dense_matrix elementwise_division(const double_dense_matrix matrix1, const double_dense_matrix matrix2) {
+    assert(matrix1.n_rows == matrix2.n_rows);
+    assert(matrix1.n_cols == matrix2.n_cols);
+
+    double_dense_matrix result_matrix = create_double_dense_matrix(matrix1.n_rows, matrix1.n_cols);
+
+    int i, j;
+    for (i = 0; i < matrix.n_rows; i++) {
+        for (j = 0; j < matrix.n_cols; j++) {
+            result_matrix.matrix[i * n_cols + j] = matrix1.matrix[i * n_cols + j] / matrix2.matrix[i * n_cols + j];
+        }
+    }
+    
     return result_matrix;
 }
 

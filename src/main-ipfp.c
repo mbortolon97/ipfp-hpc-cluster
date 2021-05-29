@@ -71,13 +71,15 @@ int main(int argc, char** argv) {
             // get the column, apply the same permutation as before, broadcast
             double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);
             double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);
-            double_dense_matrix cbg_marginals_at_hour = permutate_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm);
-            double_dense_matrix poi_marginals_at_hour = permutate_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
-            clean_double_dense_matrix(poi_marginals_at_hour_not_perm);
-            clean_double_dense_matrix(cbg_marginals_at_hour_not_perm);
+            double_dense_matrix cbg_marginals_at_hour = permutate_double_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm);
+            double_dense_matrix poi_marginals_at_hour = permutate_double_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
+            clean_double_dense_matrix(&poi_marginals_at_hour_not_perm);
+            clean_double_dense_matrix(&cbg_marginals_at_hour_not_perm);
 
-            distribute = distribute_dense_matrix(partition, poi_marginals_at_hour);  // TODO: missing (M)
-            distribute = distribute_dense_matrix(partition, cbg_marginals_at_hour);  // TODO: missing (M)
+            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, poi_marginals_at_hour);
+            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, cbg_marginals_at_hour);  // TODO: missing (M)
+            clean_double_dense_matrix(&cbg_marginals_at_hour);
+            clean_double_dense_matrix(&poi_marginals_at_hour);
         } else {
             // receive broadcast
             if (col_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
@@ -93,15 +95,16 @@ int main(int argc, char** argv) {
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             if (i % 2 == 1) {
                 // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
-                dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix); // TODO: missing (M)
-                dense_matrix alfa_i;
+                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix); // TODO: missing (M)
+                double_dense_matrix alfa_i;
                 if (row_responsible(working_submatrix, world_rank) == 0) {  // TODO: missing (T)
-                    dense_matrix aggregate_results = aggregate_sum_results(sum_result);  // TODO: missing
+                    double_dense_matrix aggregate_results = aggregate_sum_results(sum_result);  // TODO: missing
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(aggregate_results); // TODO: missing (M)
                     // alfa_i = cbg_marginals_u / last_w_axis_sum
-                    alfa_i = elementwise_division(cbg_marginals_at_hour, aggregate_results); // TODO: missing
+                    alfa_i = elementwise_division(cbg_marginals_at_hour_responsible, aggregate_results);
                     distribute_coefficient_results(alfa_i); // TODO: missing
+                    clean_double_dense_matrix(&aggregate_results);
                 } else {
                     send_sum_results(sum_result);  // TODO: missing
                     alfa_i = receive_aggregate_sum_results(alfa_i);  // TODO: missing
@@ -117,7 +120,7 @@ int main(int argc, char** argv) {
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(aggregate_results); // TODO: missing (M)
                     // alfa_i = cbg_marginals_u / last_w_axis_sum
-                    alfa_i = elementwise_division(poi_marginals_at_hour, aggregate_results); // TODO: missing
+                    alfa_i = elementwise_division(poi_marginals_at_hour_responsible, aggregate_results); // TODO: missing
                     distribute_coefficient_results(alfa_i); // TODO: missing
                 } else {
                     send_sum_results(sum_result); // TODO: missing
