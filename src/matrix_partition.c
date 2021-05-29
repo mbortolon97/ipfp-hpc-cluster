@@ -19,6 +19,8 @@ struct factor_list {
 struct factor_list factorize(int n) {
     int factor = 2;
     struct factor_list list;
+    list.last_element = NULL;
+    list.first_element = NULL;
     while (n > 1)
     {
         while (n % factor != 0)
@@ -133,8 +135,14 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
             }
             partition.assignments[process_id].start_row = n_rows_per_process * i;
             partition.assignments[process_id].stop_row = n_rows_per_process * (i + 1);
+            if (i == partition.subp_rows - 1) {
+                partition.assignments[process_id].stop_row += n_rows - (partition.subp_rows * n_rows_per_process);
+            }
             partition.assignments[process_id].start_col = n_cols_per_process * j;
             partition.assignments[process_id].stop_col = n_cols_per_process * (j + 1);
+            if (j == partition.subp_cols - 1) {
+                partition.assignments[process_id].stop_col += n_cols - (partition.subp_cols * n_cols_per_process);
+            }
 
             partition.assignments[process_id].col_responsible = partition.col_master[j].col_master_process_id;
             partition.assignments[process_id].row_responsible = partition.row_master[i].row_master_process_id;
