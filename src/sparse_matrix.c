@@ -11,6 +11,8 @@ double_sparse_matrix create_double_sparse_matrix(int n_rows, int n_cols, int n_e
     matrix.rows = malloc(n_elements * sizeof(int));
     matrix.cols = malloc(n_elements * sizeof(int));
     matrix.values = malloc(n_elements * sizeof(double));
+
+    return matrix;
 }
 
 void clean_sparse_matrix(double_sparse_matrix* matrix) {
