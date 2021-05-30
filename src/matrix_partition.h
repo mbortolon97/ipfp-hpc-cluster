@@ -53,4 +53,10 @@ static inline bool check_if_inside_submatrix(submatrix_assignment assignment, in
     return row >= assignment.start_row && row < assignment.stop_row && col >= assignment.start_col && col < assignment.stop_col;
 }
 
+/**
+ * check if the number of processes is a prime number > 3
+ * if it is, kills the last process (which won't be used)
+ */
+bool check_number_of_processes(int* world_size, int* world_rank);
+
 #endif

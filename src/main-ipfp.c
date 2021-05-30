@@ -10,21 +10,13 @@
 
 #define NUM_ITERATIONS 100
 
-/*
- * TODOS:
- * - if n_processes is a prime number >= 5 ---> test (we should kill the last process which is unused and decrease world size)
- * - if a submatrix is empty, does it still work?
- * - line 72: permutated_aggregate_visit_matrix ?
- * - remove submatrix_queue attribute from submatrix
- */
-
 
 int main(int argc, char** argv) {
     if (argc != 4) {
         printf("Usage: distributedIPFP [aggregate_visit_matrix] [week_poi_marginals] [week_cbg_marginals]\n");
         exit(1);
     }
-    srand(time(NULL));
+    srand(0);
     // Input ( read from the file - file format? )
     // Shuffle rows and columns (create map between origin and destination)
     // Compute the sub matrix divisions (greedy algorithm)
@@ -38,11 +30,17 @@ int main(int argc, char** argv) {
     // - Compute the sum for the row/column inside the submatrix
     // - Send the result to the row master
 
+
 	MPI_Init(&argc, &argv);
 	int world_size, world_rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     
+    if(check_number_of_processes(&world_size, &world_rank)){
+        MPI_Finalize();
+        return 0; // the last process terminates if it won't be used
+    }
+
     // input data read from files.txt
     double_sparse_matrix aggregate_visit_matrix;
     double_sparse_matrix poi_marginals_matrix;
@@ -73,7 +71,7 @@ int main(int argc, char** argv) {
 
         printf("Sending data...\n");
         // send submatrices to other processes
-        submatrix_to_elaborate = distribute_sparse_matrix(&partition, aggregate_visit_matrix);
+        submatrix_to_elaborate = distribute_sparse_matrix(&partition, permutated_aggregate_visit_matrix);
         printf("Data send\n");
     } else {
         printf("Receiving data... %d\n", world_rank);

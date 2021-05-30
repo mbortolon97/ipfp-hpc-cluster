@@ -15,6 +15,22 @@ struct factor_list {
     struct factor_list_element* first_element;
 };
 
+
+// returns true for the last process if it has to return (not used)
+bool check_number_of_processes(int* world_size, int* world_rank){
+    if (world_size[0]<5) return false;
+    int half = (*world_size) / 2;
+
+    // if is not a prime number return 0
+    for (int i=2; i<half; i++)
+        if (world_size[0]%i == 0) return false;
+    
+    // else decrease world size
+    *world_size = (*world_size)-1;
+    return *world_size == *world_rank;
+}
+
+
 // given a number to factorize (n), returns an array of factors (res) and its length (len)
 struct factor_list factorize(int n) {
     int factor = 2;
