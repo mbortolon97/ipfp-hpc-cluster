@@ -115,11 +115,11 @@ int main(int argc, char** argv) {
             
         } else {
             // receive broadcast
-            if (col_responsible(submatrix_to_elaborate, world_rank) == 0) {
+            if (col_responsible(submatrix_to_elaborate, world_rank)) {
                 poi_marginals_at_hour_responsible = receive_dense_matrix(0, MPI_COMM_WORLD);
                 col_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
-            if (row_responsible(submatrix_to_elaborate, world_rank) == 0) {
+            if (row_responsible(submatrix_to_elaborate, world_rank)) {
                 cbg_marginals_at_hour_responsible = receive_dense_matrix(0, MPI_COMM_WORLD);
                 row_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
