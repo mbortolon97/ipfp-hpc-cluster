@@ -152,13 +152,16 @@ double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix) {
 
 double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix) {
     double_dense_matrix result_matrix = create_double_dense_matrix(submatrix.stop_row - submatrix.start_row, 1);
+    printf("Sum matrix along cols\n");
     int i;
     for (i = 0; i < submatrix.stop_row - submatrix.start_row; i++) {
         result_matrix.matrix[i] = 0.0;
     }
+    printf("Set to zero\n");
     for (i = 0; i < submatrix.n_elements; i++) {
         result_matrix.matrix[submatrix.elements[i].row] += submatrix.elements[i].val;
     }
+    printf("Summed\n");
     return result_matrix;
 }
 
