@@ -209,8 +209,15 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
     build_mpi_tuple(&mpi_tuple);
 
     for (int i = 0; i< n_processes; i++){
+        int j = 0;
         MPI_Recv( buffer , n_elements_biggest_sumbatrix+1 , mpi_tuple , i , 0 , MPI_COMM_WORLD , &status);
-        ///// while row!=-1
+        while (buffer[j].row!=-1){
+            results.rows[index] = buffer[j].row;
+            results.cols[index] = buffer[j].col;
+            results.values[index] = buffer[j].val;
+            j++;
+            index++;
+        }
         // add element to results;
     }
     return results;
