@@ -98,6 +98,7 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
     partition.assignments = malloc(n_processes * sizeof(submatrix_assignment));
     partition.col_master = malloc(partition.subp_cols * sizeof(submatrix_col_master));
     partition.row_master = malloc(partition.subp_rows * sizeof(submatrix_row_master));
+    partition.n_elements_biggest_partition = 0;
 
     int process_id = 0;
     int n_rows_per_process = n_rows / partition.subp_rows;

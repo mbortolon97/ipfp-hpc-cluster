@@ -38,6 +38,12 @@ submatrix wait_for_sparse_matrix();
 
 submatrix clone_submatrix(const submatrix original_submatrix);
 
+// send submatrices through MPI
+double_sparse_matrix group_submatrices(submatrix working_submatrix, double_sparse_matrix* original_matrix, const int n_processes, const int n_elements_biggest_sumbatrix);
+void send_submatrices(submatrix working_submatrix); 
+
+
+
 // operations on submatrices
 double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix);
 double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix);

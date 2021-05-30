@@ -37,6 +37,8 @@ typedef struct submatrix_partition_struct {
     submatrix_col_master* col_master;
     submatrix_row_master* row_master;
 
+    int n_elements_biggest_partition;
+
     int* process_row;
     int* process_col;
     int* rows_responsible;
