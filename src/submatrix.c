@@ -226,3 +226,12 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
     }
     return results;
 }
+
+
+void util_print_submatrix(const submatrix submatrix){
+    printf("n_elements=%d   starts=[%d,%d] stop=[%d,%d]\n", submatrix.n_elements, submatrix.start_row, submatrix.start_col, submatrix.stop_row, submatrix.stop_col);
+    for (int i=0; i<submatrix.n_elements; i++){
+        printf("- (%d,%d): %lf\n", submatrix.elements[i].row, submatrix.elements[i].col, submatrix.elements[i].val);
+    }
+    printf("\n");
+}

@@ -59,4 +59,7 @@ void multiply_coefficient_by_rows(const double_dense_matrix alfa_i, submatrix wo
 
 void clean_submatrix(submatrix *submatrix);
 
+// utils
+void util_print_submatrix(const submatrix submatrix);
+
 #endif
