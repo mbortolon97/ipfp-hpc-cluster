@@ -124,11 +124,11 @@ submatrix create_empty_submatrix(int* infos){
 }
 
 void fill_submatrix(submatrix my_submatrix){
-    submatrix_queue* tmp_col;
+    submatrix_queue* tmp_pointer;
 
     for (int i=0; i<my_submatrix.n_elements; i++){
-        int row = my_submatrix.elements[i].row;
-        int col = my_submatrix.elements[i].col;
+        int row = my_submatrix.elements[i].row - my_submatrix.start_row;
+        int col = my_submatrix.elements[i].col - my_submatrix.start_col;
 
         // add element to row index
         if (my_submatrix.row_queue[row]==NULL){
@@ -136,12 +136,12 @@ void fill_submatrix(submatrix my_submatrix){
             my_submatrix.row_queue[row]->next = NULL;
             my_submatrix.row_queue[row]->element = &(my_submatrix.elements[i]);
         } else {
-            tmp_col = my_submatrix.row_queue[row];
-            while(tmp_col->next != NULL)
-                tmp_col = tmp_col->next;
-            tmp_col->next = malloc(sizeof(submatrix_queue));
-            tmp_col->next->next = NULL;
-            tmp_col->next->element = &(my_submatrix.elements[i]);
+            tmp_pointer = my_submatrix.row_queue[row];
+            while(tmp_pointer->next != NULL)
+                tmp_pointer = tmp_pointer->next;
+            tmp_pointer->next = malloc(sizeof(submatrix_queue));
+            tmp_pointer->next->next = NULL;
+            tmp_pointer->next->element = &(my_submatrix.elements[i]);
         }
 
         // add element to col index
@@ -150,12 +150,12 @@ void fill_submatrix(submatrix my_submatrix){
             my_submatrix.col_queue[col]->next = NULL;
             my_submatrix.col_queue[col]->element = &(my_submatrix.elements[i]);
         } else {
-            tmp_col = my_submatrix.col_queue[col];
-            while(tmp_col->next != NULL)
-                tmp_col = tmp_col->next;
-            tmp_col->next = malloc(sizeof(submatrix_queue));
-            tmp_col->next->next = NULL;
-            tmp_col->next->element = &(my_submatrix.elements[i]);
+            tmp_pointer = my_submatrix.col_queue[col];
+            while(tmp_pointer->next != NULL)
+                tmp_pointer = tmp_pointer->next;
+            tmp_pointer->next = malloc(sizeof(submatrix_queue));
+            tmp_pointer->next->next = NULL;
+            tmp_pointer->next->element = &(my_submatrix.elements[i]);
         }
     }
     return my_submatrix;

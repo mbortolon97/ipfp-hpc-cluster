@@ -9,6 +9,13 @@
 
 #define NUM_ITERATIONS 100
 
+/*
+ * TODOS:
+ * - if n_processes is a prime number >= 5 ---> test (we should kill the last process which is unused and decrease world size)
+ * - if a submatrix is empty, does it still work?
+ */
+
+
 int main(int argc, char** argv) {
     if (argc != 4) {
         printf("Usage: distributedIPFP [aggregate_visit_matrix] [week_poi_marginals] [week_cbg_marginals]\n");
