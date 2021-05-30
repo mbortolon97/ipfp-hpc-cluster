@@ -20,4 +20,9 @@ process_list distribute_col_processes_list(const submatrix_partition partition, 
 process_list receive_process_list(int source, MPI_Comm comm);
 void clean_process_list(process_list* list);
 
+void send_sum_results(double_dense_matrix sum_result, int dest, MPI_Comm comm);
+void aggregate_sum_results(double_dense_matrix sum_result, const process_list list, MPI_Comm comm);
+
+void distribute_dense_matrix_to_processes(double_dense_matrix matrix, process_list list, MPI_Comm comm);
+
 #endif
