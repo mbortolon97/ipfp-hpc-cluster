@@ -9,6 +9,15 @@
 
 #define NUM_ITERATIONS 100
 
+/*
+ * TODOS:
+ * - if n_processes is a prime number >= 5 ---> test (we should kill the last process which is unused and decrease world size)
+ * - if a submatrix is empty, does it still work?
+ * - line 72: permutated_aggregate_visit_matrix ?
+ * - remove submatrix_queue attribute from submatrix
+ */
+
+
 int main(int argc, char** argv) {
     if (argc != 4) {
         printf("Usage: distributedIPFP [aggregate_visit_matrix] [week_poi_marginals] [week_cbg_marginals]\n");
@@ -62,10 +71,10 @@ int main(int argc, char** argv) {
         partition = create_submatrix_partition(world_size, aggregate_visit_matrix.n_rows, aggregate_visit_matrix.n_cols);
 
         // send submatrices to other processes
-        submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);  // TODO: missing (T) // permutated_aggregate_visit_matrix?
+        submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);
     } else {
         // receive submatrix from process_0
-        submatrix_to_elaborate = wait_for_sparse_matrix(); // TODO: missing (T)
+        submatrix_to_elaborate = wait_for_sparse_matrix(); 
     }
 
     // for every hour compute IPFP
@@ -95,24 +104,24 @@ int main(int argc, char** argv) {
             
         } else {
             // receive broadcast
-            if (col_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+            if (col_responsible(submatrix_to_elaborate, world_rank) == 0) {
                 poi_marginals_at_hour_responsible = receive_dense_matrix(0, MPI_COMM_WORLD);
                 col_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
-            if (row_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+            if (row_responsible(submatrix_to_elaborate, world_rank) == 0) {
                 cbg_marginals_at_hour_responsible = receive_dense_matrix(0, MPI_COMM_WORLD);
                 row_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
         }
-        // create a copy of the submatrix (one copy fo each hour) 
-        submatrix working_submatrix = clone_submatrix(submatrix_to_elaborate); // TODO: missing (T)
+        // create a copy of the submatrix (one copy for each hour) 
+        submatrix working_submatrix = clone_submatrix(submatrix_to_elaborate);
 
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             if (i % 2 == 1) {
                 // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
                 double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix);
                 double_dense_matrix alfa_i;
-                if (row_responsible(working_submatrix, world_rank)) {  // TODO: missing (T)
+                if (row_responsible(working_submatrix, world_rank)) {
                     aggregate_sum_results(sum_result, row_process_list, MPI_COMM_WORLD);
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(sum_result);
@@ -131,7 +140,7 @@ int main(int argc, char** argv) {
                 // last_w_axis_sum = torch.sparse.sum(last_w, dim=1).to_dense()
                 double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix);
                 double_dense_matrix alfa_i;
-                if (col_responsible(working_submatrix, world_rank)) {  // TODO: missing (T)
+                if (col_responsible(working_submatrix, world_rank)) {
                     aggregate_sum_results(sum_result, col_process_list, MPI_COMM_WORLD);
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(sum_result);
@@ -144,15 +153,14 @@ int main(int argc, char** argv) {
                 }
                 clean_double_dense_matrix(&sum_result);
                 // new_w = sparse_dense_vector_mul(last_w, alfa_i)
-                // TODO: missing
                 multiply_coefficient_by_rows(alfa_i, working_submatrix);
                 clean_double_dense_matrix(&alfa_i);
             }
         }
-        if (col_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+        if (col_responsible(submatrix_to_elaborate, world_rank) == 0) {
             clean_double_dense_matrix(&poi_marginals_at_hour_responsible);
         }
-        if (row_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+        if (row_responsible(submatrix_to_elaborate, world_rank) == 0) {
             clean_double_dense_matrix(&cbg_marginals_at_hour_responsible);
         }
         if (world_rank == 0) {

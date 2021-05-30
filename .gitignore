@@ -3,7 +3,7 @@
 
 # Temporary Files
 **tmp**
-matrix.txt
+matrix*.txt
 
 # Object files
 *.o
