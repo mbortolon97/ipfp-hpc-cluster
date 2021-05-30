@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
         /*
         if (world_rank == 0) {
             // process_0 receives the submatrices, undo the permutations and store the result on a file
-            double_sparse_matrix permutated_corrected_matrix = group_submatrixes(working_submatrix); // TODO: missing (T)
+            double_sparse_matrix permutated_corrected_matrix = group_submatrices(working_submatrix, &aggregate_visit_matrix, partition.subp_cols*partition.subp_rows, partition.n_elements_biggest_partition);
             double_sparse_matrix corrected_matrix = inverse_double_sparse_matrix_permutation(permutation, permutated_corrected_matrix);
             clean_sparse_matrix(&permutated_corrected_matrix);
             char str[512];
@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
             
         } else {
             // the other process send the submatrices to the main process
-            send_submatrixes(working_submatrix); // TODO: missing (T)
+            send_submatrices(working_submatrix); 
         }
         */
 

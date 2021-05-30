@@ -30,19 +30,25 @@ typedef struct submatrix_struct
 } submatrix;
 
 // check if the process is the col master
-static inline bool col_responsible(submatrix submatrix, int world_rank) {
+static inline bool col_responsible(const submatrix submatrix, const int world_rank) {
     return submatrix.col_responsible == world_rank;
 }
 
-static inline bool row_responsible(submatrix submatrix, int world_rank) {
+static inline bool row_responsible(const submatrix submatrix, const int world_rank) {
     return submatrix.row_responsible == world_rank;
 }
 
 // get submatrix through MPI
-submatrix distribute_sparse_matrix(submatrix_partition partition, double_sparse_matrix matirx);
+submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse_matrix matirx);
 submatrix wait_for_sparse_matrix();
 
 submatrix clone_submatrix(const submatrix original_submatrix);
+
+// send submatrices through MPI
+double_sparse_matrix group_submatrices(submatrix working_submatrix, double_sparse_matrix* original_matrix, const int n_processes, const int n_elements_biggest_sumbatrix);
+void send_submatrices(submatrix working_submatrix); 
+
+
 
 // operations on submatrices
 double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix);

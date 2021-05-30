@@ -34,8 +34,8 @@ void build_mpi_tuple(MPI_Datatype *mpi_tuple)
 }
 
 
-submatrix distribute_sparse_matrix(submatrix_partition partition, double_sparse_matrix matrix){
-    int n_processes = partition.subp_rows * partition.subp_cols;
+submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse_matrix matrix){
+    int n_processes = partition->subp_rows * partition->subp_cols;
     int elements_assigned_to_process_counter[n_processes];
     MPI_Datatype mpi_tuple;
     submatrix process_0_submatrix;
@@ -47,7 +47,7 @@ submatrix distribute_sparse_matrix(submatrix_partition partition, double_sparse_
         int found = 0;
         for (int p=0; p<n_processes && !found; p++){
             // if process P must handle element I
-            if (check_if_inside_submatrix(partition.assignments[p], matrix.rows[i], matrix.cols[i])){
+            if (check_if_inside_submatrix(partition->assignments[p], matrix.rows[i], matrix.cols[i])){
                 found=1;
                 // increase the counter of the elements handled by P
                 elements_assigned_to_process_counter[p]++;
@@ -60,22 +60,24 @@ submatrix distribute_sparse_matrix(submatrix_partition partition, double_sparse_
 
     // send infos to other processes
     for (int p=0; p<n_processes; p++){
+        if (partition->n_elements_biggest_partition < elements_assigned_to_process_counter[p])
+            partition->n_elements_biggest_partition = elements_assigned_to_process_counter[p];
         
         // send some informations to the specific process (so that he can allocate the correct space in memory)
         int infos[7];
-        infos[0] = partition.assignments[p].start_row;
-        infos[1] = partition.assignments[p].stop_row;
-        infos[2] = partition.assignments[p].start_col;
-        infos[3] = partition.assignments[p].stop_col;
+        infos[0] = partition->assignments[p].start_row;
+        infos[1] = partition->assignments[p].stop_row;
+        infos[2] = partition->assignments[p].start_col;
+        infos[3] = partition->assignments[p].stop_col;
         infos[4] = elements_assigned_to_process_counter[p];
-        infos[5] = partition.assignments[p].col_responsible;
-        infos[6] = partition.assignments[p].row_responsible;
+        infos[5] = partition->assignments[p].col_responsible;
+        infos[6] = partition->assignments[p].row_responsible;
   
         // create a countiguous block of memory to send the data
         struct mpi_matrix_element* mpi_data = malloc(sizeof(struct mpi_matrix_element)*elements_assigned_to_process_counter[p]);
         int count = 0;
         for (int i=0; i<matrix.n_elements; i++){
-            if (check_if_inside_submatrix(partition.assignments[p], matrix.rows[i], matrix.cols[i])){
+            if (check_if_inside_submatrix(partition->assignments[p], matrix.rows[i], matrix.cols[i])){
                 mpi_data[count].row = matrix.rows[i];
                 mpi_data[count].col = matrix.cols[i];
                 mpi_data[count].val = matrix.values[i];
@@ -179,7 +181,39 @@ void multiply_coefficient_by_rows(const double_dense_matrix alfa_i, submatrix wo
 submatrix clone_submatrix(const submatrix original_submatrix){
     submatrix clone;
     memcpy(&clone, &original_submatrix, sizeof(submatrix));
-    clone.elements = malloc(sizeof(struct mpi_matrix_element)*original_submatrix.n_elements);
+    clone.elements = malloc(sizeof(struct mpi_matrix_element)*(original_submatrix.n_elements+1));
     memcpy(clone.elements, original_submatrix.elements, sizeof(struct mpi_matrix_element)*original_submatrix.n_elements);
+    clone.elements[clone.n_elements].row = -1; /// this one is needed when we send back the matrix --> know the length;
     return clone;
+}
+
+// sending submatrices back to process 0
+void send_submatrices(submatrix working_submatrix){
+    MPI_Datatype mpi_tuple;
+    build_mpi_tuple(&mpi_tuple);
+
+    MPI_Send( working_submatrix.elements , working_submatrix.n_elements+1 , mpi_tuple , 0 , 0 , MPI_COMM_WORLD);
+}
+
+double_sparse_matrix group_submatrices(submatrix working_submatrix, double_sparse_matrix* original_matrix, const int n_processes, const int n_elements_biggest_sumbatrix){
+    double_sparse_matrix results = create_double_sparse_matrix(original_matrix->n_rows, original_matrix->n_cols, original_matrix->n_elements);
+    struct mpi_matrix_element buffer[n_elements_biggest_sumbatrix+1];
+    int index = 0;
+    MPI_Status status;
+    MPI_Datatype mpi_tuple;
+    build_mpi_tuple(&mpi_tuple);
+
+    for (int i = 0; i< n_processes; i++){
+        int j = 0;
+        MPI_Recv( buffer , n_elements_biggest_sumbatrix+1 , mpi_tuple , i , 0 , MPI_COMM_WORLD , &status);
+        while (buffer[j].row!=-1){
+            results.rows[index] = buffer[j].row;
+            results.cols[index] = buffer[j].col;
+            results.values[index] = buffer[j].val;
+            j++;
+            index++;
+        }
+        // add element to results;
+    }
+    return results;
 }
