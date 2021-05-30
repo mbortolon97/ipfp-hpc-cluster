@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
                     printf("%d send coefficient\n", world_rank);
                 } else {
                     send_sum_results(sum_result, working_submatrix.col_responsible, MPI_COMM_WORLD);
-                    printf("Send sum result\n");
+                    printf("%d Send sum result\n", world_rank);
                     alfa_i = receive_double_dense_matrix(working_submatrix.col_responsible, MPI_COMM_WORLD);
                     printf("%d Receive coefficient %d %d\n", world_rank, alfa_i.n_rows, alfa_i.n_cols);
                 }

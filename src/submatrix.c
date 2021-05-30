@@ -134,6 +134,11 @@ submatrix wait_for_sparse_matrix(){
     build_mpi_tuple(&mpi_tuple);
     MPI_Recv( my_submatrix.elements , my_submatrix.n_elements , mpi_tuple , 0 , 0 , MPI_COMM_WORLD , &status);
 
+    int i;
+    for (i = 0; i < my_submatrix.n_elements; i++) {
+        my_submatrix.elements[i].row -= my_submatrix.start_row;
+        my_submatrix.elements[i].col -= my_submatrix.start_col;
+    }
     return my_submatrix;
 }
 
@@ -194,6 +199,12 @@ submatrix clone_submatrix(const submatrix original_submatrix){
 void send_submatrices(submatrix working_submatrix){
     MPI_Datatype mpi_tuple;
     build_mpi_tuple(&mpi_tuple);
+
+    int i;
+    for (i = 0; i < working_submatrix.n_elements; i++) {
+        working_submatrix.elements[i].row += working_submatrix.start_row;
+        working_submatrix.elements[i].col += working_submatrix.start_col;
+    }
 
     MPI_Send( working_submatrix.elements , working_submatrix.n_elements+1 , mpi_tuple , 0 , 0 , MPI_COMM_WORLD);
 }
