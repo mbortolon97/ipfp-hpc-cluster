@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
         printf("Sending data...\n");
         // send submatrices to other processes
-        submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);
+        submatrix_to_elaborate = distribute_sparse_matrix(&partition, aggregate_visit_matrix);
         printf("Data send\n");
     } else {
         printf("Receiving data... %d\n", world_rank);

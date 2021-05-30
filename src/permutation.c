@@ -89,10 +89,11 @@ double_dense_matrix permutate_double_dense_matrix_along_rows(const sparse_matrix
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
         for (j = 0; j < matrix.n_cols; j++) {
+            printf("Permutation %d\n", permutation.col_permutations[j]);
             permutated_matrix.matrix[i * matrix.n_cols + j] = matrix.matrix[i * matrix.n_cols + permutation.col_permutations[j]];
         }
     }
-    printf("")
+    printf("Permutation complete\n");
     return permutated_matrix;
 }
 
