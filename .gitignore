@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Output Files
+save_result**
+
 # Temporary Files
 **tmp**
 matrix*.txt
