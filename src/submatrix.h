@@ -3,6 +3,7 @@
 
 #include "sparse_matrix.h"
 #include "matrix_partition.h"
+#include <stdlib.h>
 
 struct mpi_matrix_element {
     int row, col;
@@ -28,9 +29,14 @@ typedef struct submatrix_struct
         int row_responsible;
 } submatrix;
 
-// returns 0 if you are a col/row master
-int col_responsible(const submatrix submatrix, const int world_rank);
-int row_responsible(const submatrix submatrix, const int world_rank);
+// check if the process is the col master
+static inline bool col_responsible(submatrix submatrix, int world_rank) {
+    return submatrix.col_responsible == world_rank;
+}
+
+static inline bool row_responsible(submatrix submatrix, int world_rank) {
+    return submatrix.row_responsible == world_rank;
+}
 
 // get submatrix through MPI
 submatrix distribute_sparse_matrix(submatrix_partition partition, double_sparse_matrix matirx);
@@ -50,5 +56,7 @@ double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix);
 
 void multiply_coefficient_by_cols(const double_dense_matrix alfa_i, submatrix working_submatrix);
 void multiply_coefficient_by_rows(const double_dense_matrix alfa_i, submatrix working_submatrix);
+
+void clean_submatrix(submatrix *submatrix);
 
 #endif

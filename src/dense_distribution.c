@@ -84,7 +84,7 @@ process_list receive_process_list(int source, MPI_Comm comm) {
     int n_subprocess;
     MPI_Recv(&(list.num_subprocesses), 1, MPI_INT, source, SEND_PROCESS_LIST_N_PROC, comm, &status);
     list.processes_id = malloc(sizeof(int) * list.num_subprocesses);
-    MPI_Recv(list.processes_id, partition.col_master[i].num_subprocesses, MPI_INT, partition.col_master[i].col_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
+    MPI_Recv(list.processes_id, list.num_subprocesses, MPI_INT, source, SEND_PROCESS_LIST_PROCESSES, comm, &status);
     return list;
 }
 
@@ -102,6 +102,31 @@ double_dense_matrix receive_dense_matrix(int source, MPI_Comm comm) {
     return result_matrix;
 }
 
-double_dense_matrix aggregate_sum_results(double_dense_matrix sum_result) {
-    for (int i = 0; i < )
+void aggregate_sum_results(double_dense_matrix sum_result, const process_list list, MPI_Comm comm) {
+    MPI_Status status;
+    double_dense_matrix receiving_buffer = create_double_dense_matrix(sum_result.n_rows, sum_result.n_cols);
+    int i, j;
+    for (i = 0; i < list.num_subprocesses; i++) {
+        MPI_Recv(receiving_buffer.matrix, sum_result.n_rows * sum_result.n_cols, MPI_INT, MPI_ANY_SOURCE, SEND_SUM_RESULTS, comm, &status);
+
+        for (j = 0; j < sum_result.n_rows * sum_result.n_cols; j++) {
+            sum_result.matrix[j] += receiving_buffer.matrix[j];
+        }
+    }
+    clean_double_dense_matrix(&receiving_buffer);
+}
+
+void send_sum_results(double_dense_matrix sum_result, int dest, MPI_Comm comm) {
+    MPI_Send(sum_result.matrix, sum_result.n_rows * sum_result.n_cols, MPI_INT, dest, SEND_SUM_RESULTS, comm);
+}
+
+void distribute_dense_matrix_to_processes(double_dense_matrix matrix, process_list list, MPI_Comm comm) {
+    int dimension[2];
+    dimension[0] = matrix.n_rows;
+    dimension[1] = matrix.n_cols;
+    int i;
+    for (i = 0; i < list.num_subprocesses; i++) {
+        MPI_Send(&dimension, 2, MPI_INT, list.processes_id[i], SEND_DENSE_MATRIX_DIMENSION, comm);
+        MPI_Send(matrix.matrix, dimension[0] * dimension[1], MPI_DOUBLE, list.processes_id[i], SEND_DENSE_MATRIX_CONTENT, comm);
+    }
 }

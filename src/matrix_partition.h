@@ -49,7 +49,7 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
 
 void clean_submatrix_partition(submatrix_partition* partition);
 
-inline bool check_if_inside_submatrix(submatrix_assignment assignment, int row, int col) {
+static inline bool check_if_inside_submatrix(submatrix_assignment assignment, int row, int col) {
     return row > assignment.start_row && row < assignment.stop_row && col > assignment.start_col && col < assignment.stop_col;
 }
 
