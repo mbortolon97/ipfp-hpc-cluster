@@ -170,10 +170,10 @@ int main(int argc, char** argv) {
                 clean_double_dense_matrix(&alfa_i);
             }
         }
-        if (col_responsible(submatrix_to_elaborate, world_rank) == 0) {
+        if (col_responsible(submatrix_to_elaborate, world_rank)) {
             clean_double_dense_matrix(&poi_marginals_at_hour_responsible);
         }
-        if (row_responsible(submatrix_to_elaborate, world_rank) == 0) {
+        if (row_responsible(submatrix_to_elaborate, world_rank)) {
             clean_double_dense_matrix(&cbg_marginals_at_hour_responsible);
         }
         /*
