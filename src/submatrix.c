@@ -5,6 +5,7 @@
 #include <string.h>
 #include "submatrix.h"
 #include "matrix_partition.h"
+#include <assert.h>
 
 submatrix create_empty_submatrix(int* infos);
 void fill_submatrix(submatrix my_submatrix);
@@ -178,4 +179,43 @@ submatrix wait_for_sparse_matrix(){
     fill_submatrix(my_submatrix);
 
     return my_submatrix;
+}
+
+
+double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix) {
+    double_dense_matrix result_matrix = create_double_dense_matrix(1, submatrix.stop_col - submatrix.start_col);
+    int i;
+    for (i = 0; i < submatrix.stop_col - submatrix.start_col; i++) {
+        result_matrix.matrix[i] = 0.0;
+    }
+    for (i = 0; i < submatrix.n_elements; i++) {
+        result_matrix.matrix[submatrix.elements[i].col] += submatrix.elements[i].val;
+    }
+    return result_matrix;
+}
+
+double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix) {
+    double_dense_matrix result_matrix = create_double_dense_matrix(submatrix.stop_row - submatrix.start_row, 1);
+    int i;
+    for (i = 0; i < submatrix.stop_row - submatrix.start_row; i++) {
+        result_matrix.matrix[i] = 0.0;
+    }
+    for (i = 0; i < submatrix.n_elements; i++) {
+        result_matrix.matrix[submatrix.elements[i].row] += submatrix.elements[i].val;
+    }
+    return result_matrix;
+}
+
+void multiply_coefficient_by_cols(const double_dense_matrix alfa_i, submatrix working_submatrix) {
+    assert(alfa_i.n_rows == 1);
+    for (i = 0; i < submatrix.n_elements; i++) {
+        submatrix.elements[i].val *= alfa_i.matrix[submatrix.elements[i].col];
+    }
+}
+
+void multiply_coefficient_by_rows(const double_dense_matrix alfa_i, submatrix working_submatrix) {
+    assert(alfa_i.n_cols == 1);
+    for (i = 0; i < submatrix.n_elements; i++) {
+        submatrix.elements[i].val *= alfa_i.matrix[submatrix.elements[i].row];
+    }
 }

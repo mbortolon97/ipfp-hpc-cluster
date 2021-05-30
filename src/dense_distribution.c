@@ -3,6 +3,8 @@
 #include <string.h>
 #include "message_tag.h"
 
+#include <stdlib.h>
+
 double_dense_matrix distribute_double_dense_matrix_using_column_partition(const submatrix_partition partition, const double_dense_matrix matrix, int world_rank, MPI_Comm comm) {
     double_dense_matrix result_matrix;
     assert(matrix.n_rows == 1);
@@ -44,6 +46,53 @@ double_dense_matrix distribute_double_dense_matrix_using_row_partition(const sub
     }
 }
 
+process_list distribute_row_processes_list(const submatrix_partition partition, int world_rank, MPI_Comm comm) {
+    process_list list;
+    int i;
+    for (i = 0; i < partition.subp_rows; i++) {
+        if (partition.row_master[i].row_master_process_id == world_rank) {
+            list.num_subprocesses = partition.row_master[i].num_subprocesses;
+            list.processes_id = malloc(sizeof(int) * list.num_subprocesses);
+            memcpy(list.processes_id, partition.row_master[i].row_processes_id, sizeof(int) * list.num_subprocesses);
+        } else {
+            MPI_Send(&(partition.row_master[i].num_subprocesses), 1, MPI_INT, partition.row_master[i].row_master_process_id, SEND_PROCESS_LIST_N_PROC, comm);
+            MPI_Send(&(partition.row_master[i].row_processes_id), partition.row_master[i].num_subprocesses, MPI_INT, partition.row_master[i].row_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
+        }
+    }
+    return list;
+}
+
+process_list distribute_col_processes_list(const submatrix_partition partition, int world_rank, MPI_Comm comm) {
+    process_list list;
+    int i;
+    for (i = 0; i < partition.subp_cols; i++) {
+        if (partition.col_master[i].col_master_process_id == world_rank) {
+            list.num_subprocesses = partition.col_master[i].num_subprocesses;
+            list.processes_id = malloc(sizeof(int) * list.num_subprocesses);
+            memcpy(list.processes_id, partition.col_master[i].col_processes_id, sizeof(int) * list.num_subprocesses);
+        } else {
+            MPI_Send(&(partition.col_master[i].num_subprocesses), 1, MPI_INT, partition.col_master[i].col_master_process_id, SEND_PROCESS_LIST_N_PROC, comm);
+            MPI_Send(&(partition.col_master[i].col_processes_id), partition.col_master[i].num_subprocesses, MPI_INT, partition.col_master[i].col_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
+        }
+    }
+    return list;
+}
+
+process_list receive_process_list(int source, MPI_Comm comm) {
+    MPI_Status status;
+    process_list list;
+    int n_subprocess;
+    MPI_Recv(&(list.num_subprocesses), 1, MPI_INT, source, SEND_PROCESS_LIST_N_PROC, comm, &status);
+    list.processes_id = malloc(sizeof(int) * list.num_subprocesses);
+    MPI_Recv(list.processes_id, partition.col_master[i].num_subprocesses, MPI_INT, partition.col_master[i].col_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
+    return list;
+}
+
+void clean_process_list(process_list* list) {
+    free(list->processes_id);
+    list->processes_id = NULL;
+}
+
 double_dense_matrix receive_dense_matrix(int source, MPI_Comm comm) {
     MPI_Status status;
     int dimension[2];
@@ -51,4 +100,8 @@ double_dense_matrix receive_dense_matrix(int source, MPI_Comm comm) {
     double_dense_matrix result_matrix = create_double_dense_matrix(dimension[0], dimension[1]);
     MPI_Recv(result_matrix.matrix, 2, MPI_INT, source, SEND_DENSE_MATRIX_CONTENT, comm, &status);
     return result_matrix;
+}
+
+double_dense_matrix aggregate_sum_results(double_dense_matrix sum_result) {
+    for (int i = 0; i < )
 }
