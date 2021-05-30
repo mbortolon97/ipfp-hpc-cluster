@@ -71,12 +71,18 @@ int main(int argc, char** argv) {
         permutated_aggregate_visit_matrix = permutate_double_sparse_matrix(permutation, aggregate_visit_matrix);
         partition = create_submatrix_partition(world_size, aggregate_visit_matrix.n_rows, aggregate_visit_matrix.n_cols);
 
+        printf("Sending data...\n");
         // send submatrices to other processes
         submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);
+        printf("Data send\n");
     } else {
+        printf("Receiving data... %d\n", world_rank);
         // receive submatrix from process_0
-        submatrix_to_elaborate = wait_for_sparse_matrix(); 
+        submatrix_to_elaborate = wait_for_sparse_matrix();
+        printf("Data received %d\n", world_rank);
     }
+
+    printf("Initialization success %d\n", world_rank);
 
     // for every hour compute IPFP
     for (int i = 0; i < poi_marginals_matrix.n_cols; i++) {
@@ -90,9 +96,13 @@ int main(int argc, char** argv) {
         if (world_rank == 0) {
             // get the column, apply the same permutation as before, broadcast
             double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);
+            printf("Col as dense\n");
             double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);
+            printf("Row as dense\n");
             double_dense_matrix cbg_marginals_at_hour = permutate_double_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm);
+            printf("Permutate double dense matrix along rows");
             double_dense_matrix poi_marginals_at_hour = permutate_double_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
+            printf("Permutate double dense matrix along columns");
             clean_double_dense_matrix(&poi_marginals_at_hour_not_perm);
             clean_double_dense_matrix(&cbg_marginals_at_hour_not_perm);
 
@@ -116,6 +126,8 @@ int main(int argc, char** argv) {
         }
         // create a copy of the submatrix (one copy for each hour) 
         submatrix working_submatrix = clone_submatrix(submatrix_to_elaborate);
+
+        printf("Complete success");
 
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             if (i % 2 == 1) {

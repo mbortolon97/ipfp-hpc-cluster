@@ -2,6 +2,7 @@
 #include "sparse_matrix.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 sparse_matrix_permutation create_sparse_matrix_random_permutation(const double_sparse_matrix matrix) {
     sparse_matrix_permutation permutation;
@@ -74,7 +75,7 @@ double_dense_matrix permutate_double_dense_matrix_along_columns(const sparse_mat
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
         for (j = 0; j < matrix.n_cols; j++) {
-            permutated_matrix.matrix[i * matrix.n_cols + j] = matrix.matrix[i * matrix.n_cols + permutation.col_permutations[j]];
+            permutated_matrix.matrix[i * matrix.n_cols + j] = matrix.matrix[permutation.row_permutations[i] * matrix.n_cols + j];
         }
     }
 
@@ -84,13 +85,14 @@ double_dense_matrix permutate_double_dense_matrix_along_columns(const sparse_mat
 double_dense_matrix permutate_double_dense_matrix_along_rows(const sparse_matrix_permutation permutation, const double_dense_matrix matrix) {
     double_dense_matrix permutated_matrix = create_double_dense_matrix(matrix.n_rows, matrix.n_cols);
 
+    printf("%d %d\n", matrix.n_rows, matrix.n_cols);
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
         for (j = 0; j < matrix.n_cols; j++) {
-            permutated_matrix.matrix[i * matrix.n_cols + j] = matrix.matrix[permutation.row_permutations[i] * matrix.n_cols + j];
+            permutated_matrix.matrix[i * matrix.n_cols + j] = matrix.matrix[i * matrix.n_cols + permutation.col_permutations[j]];
         }
     }
-
+    printf("")
     return permutated_matrix;
 }
 
