@@ -84,7 +84,7 @@ process_list receive_process_list(int source, MPI_Comm comm) {
     int n_subprocess;
     MPI_Recv(&(list.num_subprocesses), 1, MPI_INT, source, SEND_PROCESS_LIST_N_PROC, comm, &status);
     list.processes_id = malloc(sizeof(int) * list.num_subprocesses);
-    MPI_Recv(list.processes_id, partition.col_master[i].num_subprocesses, MPI_INT, partition.col_master[i].col_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
+    MPI_Recv(list.processes_id, list.num_subprocesses, MPI_INT, source, SEND_PROCESS_LIST_PROCESSES, comm, &status);
     return list;
 }
 
@@ -109,7 +109,7 @@ void aggregate_sum_results(double_dense_matrix sum_result, const process_list li
     for (i = 0; i < list.num_subprocesses; i++) {
         MPI_Recv(receiving_buffer.matrix, sum_result.n_rows * sum_result.n_cols, MPI_INT, MPI_ANY_SOURCE, SEND_SUM_RESULTS, comm, &status);
 
-        for (j = 0; j < result_matrix.matrix; j++) {
+        for (j = 0; j < sum_result.n_rows * sum_result.n_cols; j++) {
             sum_result.matrix[j] += receiving_buffer.matrix[j];
         }
     }

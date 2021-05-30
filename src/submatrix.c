@@ -113,6 +113,11 @@ submatrix create_empty_submatrix(int* infos){
     return my_submatrix;
 }
 
+void clean_submatrix(submatrix *submatrix) {
+    free(submatrix->elements);
+    submatrix->elements = NULL;
+}
+
 submatrix wait_for_sparse_matrix(){
     int infos[7];
     MPI_Status status;
@@ -157,15 +162,17 @@ double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix) {
 
 void multiply_coefficient_by_cols(const double_dense_matrix alfa_i, submatrix working_submatrix) {
     assert(alfa_i.n_rows == 1);
-    for (i = 0; i < submatrix.n_elements; i++) {
-        submatrix.elements[i].val *= alfa_i.matrix[submatrix.elements[i].col];
+    int i;
+    for (i = 0; i < working_submatrix.n_elements; i++) {
+        working_submatrix.elements[i].val *= alfa_i.matrix[working_submatrix.elements[i].col];
     }
 }
 
 void multiply_coefficient_by_rows(const double_dense_matrix alfa_i, submatrix working_submatrix) {
     assert(alfa_i.n_cols == 1);
-    for (i = 0; i < submatrix.n_elements; i++) {
-        submatrix.elements[i].val *= alfa_i.matrix[submatrix.elements[i].row];
+    int i;
+    for (i = 0; i < working_submatrix.n_elements; i++) {
+        working_submatrix.elements[i].val *= alfa_i.matrix[working_submatrix.elements[i].row];
     }
 }
 
@@ -173,6 +180,6 @@ submatrix clone_submatrix(const submatrix original_submatrix){
     submatrix clone;
     memcpy(&clone, &original_submatrix, sizeof(submatrix));
     clone.elements = malloc(sizeof(struct mpi_matrix_element)*original_submatrix.n_elements);
-    memcpy(clone.elements, original_submatrix.elements, sizeof(struct mpi_matrix_element)*n_elements);
+    memcpy(clone.elements, original_submatrix.elements, sizeof(struct mpi_matrix_element)*original_submatrix.n_elements);
     return clone;
 }

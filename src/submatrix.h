@@ -30,11 +30,11 @@ typedef struct submatrix_struct
 } submatrix;
 
 // check if the process is the col master
-inline bool col_responsible(const submatrix submatrix, const int world_rank){
+static inline bool col_responsible(submatrix submatrix, int world_rank) {
     return submatrix.col_responsible == world_rank;
 }
 
-inline bool row_responsible(const submatrix submatrix, const int world_rank){
+static inline bool row_responsible(submatrix submatrix, int world_rank) {
     return submatrix.row_responsible == world_rank;
 }
 
@@ -50,5 +50,7 @@ double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix);
 
 void multiply_coefficient_by_cols(const double_dense_matrix alfa_i, submatrix working_submatrix);
 void multiply_coefficient_by_rows(const double_dense_matrix alfa_i, submatrix working_submatrix);
+
+void clean_submatrix(submatrix *submatrix);
 
 #endif

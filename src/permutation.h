@@ -32,16 +32,16 @@ double_sparse_matrix permutate_double_sparse_matrix(const sparse_matrix_permutat
 /**
  * Permutate a given dense matrix based on column of the sparse permutation
  **/
-double_dense_matrix  permutate_dense_matrix_along_columns(const sparse_matrix_permutation permutation, const double_dense_matrix matrix);
+double_dense_matrix  permutate_double_dense_matrix_along_columns(const sparse_matrix_permutation permutation, const double_dense_matrix matrix);
 
 /**
  * Permutate a given dense matrix based on row of the sparse permutation
  **/
-double_dense_matrix  permutate_dense_matrix_along_rows(const sparse_matrix_permutation permutation, const double_dense_matrix matrix);
+double_dense_matrix  permutate_double_dense_matrix_along_rows(const sparse_matrix_permutation permutation, const double_dense_matrix matrix);
 
 /**
  * This function inverse a permutation based on row of the sparse permutation
  **/
-double_sparse_matrix inverse_sparse_matrix_permutation(const sparse_matrix_permutation permutation, const double_sparse_matrix matrix);
+double_sparse_matrix inverse_double_sparse_matrix_permutation(const sparse_matrix_permutation permutation, const double_sparse_matrix matrix);
 
 #endif
