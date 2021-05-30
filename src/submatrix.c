@@ -182,22 +182,10 @@ submatrix clone_submatrix(const submatrix original_submatrix){
     submatrix clone;
     memcpy(&clone, &original_submatrix, sizeof(submatrix));
     clone.elements = malloc(sizeof(struct mpi_matrix_element)*(original_submatrix.n_elements+1));
-    memcpy(clone.elements, original_submatrix.elements, sizeof(struct mpi_matrix_element)*n_elements);
+    memcpy(clone.elements, original_submatrix.elements, sizeof(struct mpi_matrix_element)*original_submatrix.n_elements);
     clone.elements[clone.n_elements].row = -1; /// this one is needed when we send back the matrix --> know the length;
     return clone;
 }
-
-
-// check if the process is the col master
-int col_responsible(const submatrix submatrix, const int world_rank){
-    return (submatrix.col_responsible == world_rank)? 0: 1;
-}
-
-int row_responsible(const submatrix submatrix, const int world_rank){
-    return (submatrix.row_responsible == world_rank)? 0: 1;
-}
-
-
 
 // sending submatrices back to process 0
 void send_submatrices(submatrix working_submatrix){
