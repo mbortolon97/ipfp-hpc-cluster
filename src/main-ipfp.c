@@ -13,6 +13,7 @@
  * TODOS:
  * - if n_processes is a prime number >= 5 ---> test (we should kill the last process which is unused and decrease world size)
  * - if a submatrix is empty, does it still work?
+ * - line 72: permutated_aggregate_visit_matrix ?
  */
 
 
@@ -69,10 +70,10 @@ int main(int argc, char** argv) {
         partition = create_submatrix_partition(world_size, aggregate_visit_matrix.n_rows, aggregate_visit_matrix.n_cols);
 
         // send submatrices to other processes
-        submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);  // TODO: missing (T) // permutated_aggregate_visit_matrix?
+        submatrix_to_elaborate = distribute_sparse_matrix(partition, aggregate_visit_matrix);
     } else {
         // receive submatrix from process_0
-        submatrix_to_elaborate = wait_for_sparse_matrix(); // TODO: missing (T)
+        submatrix_to_elaborate = wait_for_sparse_matrix(); 
     }
 
     // for every hour compute IPFP
@@ -110,7 +111,7 @@ int main(int argc, char** argv) {
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             if (i % 2 == 1) {
                 // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
-                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix); // TODO: missing (M)
+                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix);
                 double_dense_matrix alfa_i;
                 if (row_responsible(working_submatrix, world_rank) == 0) {  // TODO: missing (T)
                     double_dense_matrix aggregate_results = aggregate_sum_results(sum_result);  // TODO: missing
@@ -125,13 +126,13 @@ int main(int argc, char** argv) {
                     alfa_i = receive_aggregate_sum_results(alfa_i);  // TODO: missing
                 }
                 // new_w = sparse_dense_vector_mul(last_w, alfa_i)
-                multiply_coefficient_by_cols(alfa_i, working_submatrix); // TODO: missing
+                multiply_coefficient_by_cols(alfa_i, working_submatrix);
             } else {
                 // last_w_axis_sum = torch.sparse.sum(last_w, dim=1).to_dense()
-                dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix);
-                dense_matrix alfa_i;
+                double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix);
+                double_dense_matrix alfa_i;
                 if (col_responsible(working_submatrix, world_rank) == 0) {  // TODO: missing (T)
-                    dense_matrix aggregate_results = aggregate_sum_results(sum_result); // TODO: missing
+                    double_dense_matrix aggregate_results = aggregate_sum_results(sum_result); // TODO: missing
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(aggregate_results);
                     // alfa_i = cbg_marginals_u / last_w_axis_sum
