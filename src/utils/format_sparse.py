@@ -16,7 +16,7 @@ def main(input_filepath, output_filepath):
     if type(result) is csr_matrix:
         result = result.tocoo()
     
-    result = result.transpose()
+    # result = result.transpose()
     
     with open(output_filepath, 'w') as outfile:
         outfile.write("{} {} {}\n".format(result.shape[0], result.shape[1], len(result.data)))

@@ -15,6 +15,7 @@ def input():
 def main(input_filepath, output_filepath):
     result = np.load(input_filepath)
     
+    result = result.T
     
     with open(output_filepath, 'w') as outfile:
         shape_str = ' '.join([str(x) for x in result.shape])

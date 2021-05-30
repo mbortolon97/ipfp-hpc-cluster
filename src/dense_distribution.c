@@ -4,6 +4,7 @@
 #include "message_tag.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 double_dense_matrix distribute_double_dense_matrix_using_column_partition(const submatrix_partition partition, const double_dense_matrix matrix, int world_rank, MPI_Comm comm) {
     double_dense_matrix result_matrix;
@@ -44,6 +45,7 @@ double_dense_matrix distribute_double_dense_matrix_using_row_partition(const sub
             memcpy(result_matrix.matrix, &(matrix.matrix[partition.row_master[i].stop_row]), dimension[0] * sizeof(double));
         }
     }
+    return result_matrix;
 }
 
 process_list distribute_row_processes_list(const submatrix_partition partition, int world_rank, MPI_Comm comm) {
@@ -81,7 +83,6 @@ process_list distribute_col_processes_list(const submatrix_partition partition, 
 process_list receive_process_list(int source, MPI_Comm comm) {
     MPI_Status status;
     process_list list;
-    int n_subprocess;
     MPI_Recv(&(list.num_subprocesses), 1, MPI_INT, source, SEND_PROCESS_LIST_N_PROC, comm, &status);
     list.processes_id = malloc(sizeof(int) * list.num_subprocesses);
     MPI_Recv(list.processes_id, list.num_subprocesses, MPI_INT, source, SEND_PROCESS_LIST_PROCESSES, comm, &status);
@@ -93,31 +94,35 @@ void clean_process_list(process_list* list) {
     list->processes_id = NULL;
 }
 
-double_dense_matrix receive_dense_matrix(int source, MPI_Comm comm) {
+double_dense_matrix receive_double_dense_matrix(int source, MPI_Comm comm) {
     MPI_Status status;
     int dimension[2];
     MPI_Recv(dimension, 2, MPI_INT, source, SEND_DENSE_MATRIX_DIMENSION, comm, &status);
     double_dense_matrix result_matrix = create_double_dense_matrix(dimension[0], dimension[1]);
-    MPI_Recv(result_matrix.matrix, 2, MPI_INT, source, SEND_DENSE_MATRIX_CONTENT, comm, &status);
+    MPI_Recv(result_matrix.matrix, dimension[0] * dimension[1], MPI_DOUBLE, source, SEND_DENSE_MATRIX_CONTENT, comm, &status);
     return result_matrix;
 }
 
 void aggregate_sum_results(double_dense_matrix sum_result, const process_list list, MPI_Comm comm) {
     MPI_Status status;
     double_dense_matrix receiving_buffer = create_double_dense_matrix(sum_result.n_rows, sum_result.n_cols);
+    printf("create matrix\n");
     int i, j;
     for (i = 0; i < list.num_subprocesses; i++) {
-        MPI_Recv(receiving_buffer.matrix, sum_result.n_rows * sum_result.n_cols, MPI_INT, MPI_ANY_SOURCE, SEND_SUM_RESULTS, comm, &status);
-
+        printf("Waiting data\n");
+        MPI_Recv(receiving_buffer.matrix, sum_result.n_rows * sum_result.n_cols, MPI_DOUBLE, MPI_ANY_SOURCE, SEND_SUM_RESULTS, comm, &status);
+        printf("Receive message %d\n", i);
         for (j = 0; j < sum_result.n_rows * sum_result.n_cols; j++) {
             sum_result.matrix[j] += receiving_buffer.matrix[j];
         }
     }
+    printf("Cleaning\n");
     clean_double_dense_matrix(&receiving_buffer);
 }
 
 void send_sum_results(double_dense_matrix sum_result, int dest, MPI_Comm comm) {
-    MPI_Send(sum_result.matrix, sum_result.n_rows * sum_result.n_cols, MPI_INT, dest, SEND_SUM_RESULTS, comm);
+    MPI_Send(sum_result.matrix, sum_result.n_rows * sum_result.n_cols, MPI_DOUBLE, dest, SEND_SUM_RESULTS, comm);
+    printf("Send sum results\n");
 }
 
 void distribute_dense_matrix_to_processes(double_dense_matrix matrix, process_list list, MPI_Comm comm) {
