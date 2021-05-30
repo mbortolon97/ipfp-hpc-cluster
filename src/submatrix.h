@@ -26,15 +26,17 @@ typedef struct submatrix_struct
 
         int col_responsible;
         int row_responsible;
-
-        submatrix_queue** row_queue;
-        submatrix_queue** col_queue;
 } submatrix;
 
+// returns 0 if you are a col/row master
+int col_responsible(const submatrix submatrix, const int world_rank);
+int row_responsible(const submatrix submatrix, const int world_rank);
 
 // get submatrix through MPI
 submatrix distribute_sparse_matrix(submatrix_partition partition, double_sparse_matrix matirx);
 submatrix wait_for_sparse_matrix();
+
+submatrix clone_submatrix(const submatrix original_submatrix);
 
 // operations on submatrices
 double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix);

@@ -14,6 +14,7 @@
  * - if n_processes is a prime number >= 5 ---> test (we should kill the last process which is unused and decrease world size)
  * - if a submatrix is empty, does it still work?
  * - line 72: permutated_aggregate_visit_matrix ?
+ * - remove submatrix_queue attribute from submatrix
  */
 
 
@@ -103,24 +104,24 @@ int main(int argc, char** argv) {
             
         } else {
             // receive broadcast
-            if (col_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+            if (col_responsible(submatrix_to_elaborate, world_rank) == 0) {
                 poi_marginals_at_hour_responsible = receive_dense_matrix(0, MPI_COMM_WORLD);
                 col_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
-            if (row_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+            if (row_responsible(submatrix_to_elaborate, world_rank) == 0) {
                 cbg_marginals_at_hour_responsible = receive_dense_matrix(0, MPI_COMM_WORLD);
                 row_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
         }
-        // create a copy of the submatrix (one copy fo each hour) 
-        submatrix working_submatrix = clone_submatrix(submatrix_to_elaborate); // TODO: missing (T)
+        // create a copy of the submatrix (one copy for each hour) 
+        submatrix working_submatrix = clone_submatrix(submatrix_to_elaborate);
 
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             if (i % 2 == 1) {
                 // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
                 double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix);
                 double_dense_matrix alfa_i;
-                if (row_responsible(working_submatrix, world_rank)) {  // TODO: missing (T)
+                if (row_responsible(working_submatrix, world_rank)) { 
                     double_dense_matrix aggregate_results = aggregate_sum_results(sum_result);  // TODO: missing
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(aggregate_results);
@@ -138,7 +139,7 @@ int main(int argc, char** argv) {
                 // last_w_axis_sum = torch.sparse.sum(last_w, dim=1).to_dense()
                 double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix);
                 double_dense_matrix alfa_i;
-                if (col_responsible(working_submatrix, world_rank) == 0) {  // TODO: missing (T)
+                if (col_responsible(working_submatrix, world_rank) == 0) { 
                     double_dense_matrix aggregate_results = aggregate_sum_results(sum_result); // TODO: missing
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(aggregate_results);
@@ -154,10 +155,10 @@ int main(int argc, char** argv) {
                 multiply_coefficient_by_rows(alfa_i, working_submatrix);
             }
         }
-        if (col_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+        if (col_responsible(submatrix_to_elaborate, world_rank) == 0) {
             clean_double_dense_matrix(&poi_marginals_at_hour_responsible);
         }
-        if (row_responsible(submatrix_to_elaborate, world_rank) == 0) { // TODO: missing (T)
+        if (row_responsible(submatrix_to_elaborate, world_rank) == 0) {
             clean_double_dense_matrix(&cbg_marginals_at_hour_responsible);
         }
         if (world_rank == 0) {

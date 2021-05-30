@@ -8,7 +8,6 @@
 #include <assert.h>
 
 submatrix create_empty_submatrix(int* infos);
-void fill_submatrix(submatrix my_submatrix);
 
 void build_mpi_tuple(MPI_Datatype *mpi_tuple)
 {
@@ -86,7 +85,6 @@ submatrix distribute_sparse_matrix(submatrix_partition partition, double_sparse_
         if (p==0){
             process_0_submatrix = create_empty_submatrix(infos); //// TO BE DONE
             process_0_submatrix.elements = mpi_data;
-            fill_submatrix(process_0_submatrix);  //// TO BE DONE
         }else{
             MPI_Send( infos , 7 , MPI_INT , p , 0 , MPI_COMM_WORLD);
             MPI_Send( mpi_data , elements_assigned_to_process_counter[p] , mpi_tuple , p , 0 , MPI_COMM_WORLD);
@@ -112,54 +110,6 @@ submatrix create_empty_submatrix(int* infos){
     // elements of array
     my_submatrix.elements = malloc(sizeof(struct mpi_matrix_element)*infos[4]);
 
-    // index by row
-    my_submatrix.row_queue = malloc( sizeof(submatrix_queue*) * (infos[1]-infos[0]));
-    for (int i=0; i<infos[1]-infos[0] ;i++)
-        my_submatrix.row_queue[i] = NULL;
-    
-    // index by col
-    my_submatrix.col_queue = malloc( sizeof(submatrix_queue*) * (infos[3]-infos[2]));
-    for (int i=0; i<infos[3]-infos[2] ;i++)
-        my_submatrix.row_queue[i] = NULL;
-
-    return my_submatrix;
-}
-
-void fill_submatrix(submatrix my_submatrix){
-    submatrix_queue* tmp_pointer;
-
-    for (int i=0; i<my_submatrix.n_elements; i++){
-        int row = my_submatrix.elements[i].row - my_submatrix.start_row;
-        int col = my_submatrix.elements[i].col - my_submatrix.start_col;
-
-        // add element to row index
-        if (my_submatrix.row_queue[row]==NULL){
-            my_submatrix.row_queue[row] = malloc(sizeof(submatrix_queue));
-            my_submatrix.row_queue[row]->next = NULL;
-            my_submatrix.row_queue[row]->element = &(my_submatrix.elements[i]);
-        } else {
-            tmp_pointer = my_submatrix.row_queue[row];
-            while(tmp_pointer->next != NULL)
-                tmp_pointer = tmp_pointer->next;
-            tmp_pointer->next = malloc(sizeof(submatrix_queue));
-            tmp_pointer->next->next = NULL;
-            tmp_pointer->next->element = &(my_submatrix.elements[i]);
-        }
-
-        // add element to col index
-        if (my_submatrix.col_queue[col]==NULL){
-            my_submatrix.col_queue[col] = malloc(sizeof(submatrix_queue));
-            my_submatrix.col_queue[col]->next = NULL;
-            my_submatrix.col_queue[col]->element = &(my_submatrix.elements[i]);
-        } else {
-            tmp_pointer = my_submatrix.col_queue[col];
-            while(tmp_pointer->next != NULL)
-                tmp_pointer = tmp_pointer->next;
-            tmp_pointer->next = malloc(sizeof(submatrix_queue));
-            tmp_pointer->next->next = NULL;
-            tmp_pointer->next->element = &(my_submatrix.elements[i]);
-        }
-    }
     return my_submatrix;
 }
 
@@ -176,7 +126,6 @@ submatrix wait_for_sparse_matrix(){
     // add elements to the queue
     build_mpi_tuple(&mpi_tuple);
     MPI_Recv( my_submatrix.elements , my_submatrix.n_elements , mpi_tuple , 0 , 0 , MPI_COMM_WORLD , &status);
-    fill_submatrix(my_submatrix);
 
     return my_submatrix;
 }
@@ -218,4 +167,22 @@ void multiply_coefficient_by_rows(const double_dense_matrix alfa_i, submatrix wo
     for (i = 0; i < submatrix.n_elements; i++) {
         submatrix.elements[i].val *= alfa_i.matrix[submatrix.elements[i].row];
     }
+}
+
+submatrix clone_submatrix(const submatrix original_submatrix){
+    submatrix clone;
+    memcpy(&clone, &original_submatrix, sizeof(submatrix));
+    clone.elements = malloc(sizeof(struct mpi_matrix_element)*original_submatrix.n_elements);
+    memcpy(clone.elements, original_submatrix.elements, sizeof(struct mpi_matrix_element)*n_elements);
+    return clone;
+}
+
+
+// check if the process is the col master
+int col_responsible(const submatrix submatrix, const int world_rank){
+    return (submatrix.col_responsible == world_rank)? 0: 1;
+}
+
+int row_responsible(const submatrix submatrix, const int world_rank){
+    return (submatrix.row_responsible == world_rank)? 0: 1;
 }
