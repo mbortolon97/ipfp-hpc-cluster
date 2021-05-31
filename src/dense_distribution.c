@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-double_dense_matrix distribute_double_dense_matrix_using_row_partition(const submatrix_partition partition, const double_dense_matrix matrix, int world_rank, MPI_Comm comm) {
+double_dense_matrix distribute_double_dense_matrix_using_column_partition(const submatrix_partition partition, const double_dense_matrix matrix, int world_rank, MPI_Comm comm) {
     double_dense_matrix result_matrix;
     assert(matrix.n_cols == 1);
 
@@ -27,7 +27,7 @@ double_dense_matrix distribute_double_dense_matrix_using_row_partition(const sub
     return result_matrix;
 }
 
-double_dense_matrix distribute_double_dense_matrix_using_column_partition(const submatrix_partition partition, const double_dense_matrix matrix, int world_rank, MPI_Comm comm) {
+double_dense_matrix distribute_double_dense_matrix_using_row_partition(const submatrix_partition partition, const double_dense_matrix matrix, int world_rank, MPI_Comm comm) {
     double_dense_matrix result_matrix;
     assert(matrix.n_rows == 1);
 

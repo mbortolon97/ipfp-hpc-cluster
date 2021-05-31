@@ -144,11 +144,11 @@ int main(int argc, char** argv) {
             row_process_list = distribute_row_processes_list(partition, world_rank, MPI_COMM_WORLD);
         } else {
             // receive broadcast
-            if (col_responsible(submatrix_to_elaborate, world_rank)) {
+            if (row_responsible(submatrix_to_elaborate, world_rank)) {
                 poi_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
                 col_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
-            if (row_responsible(submatrix_to_elaborate, world_rank)) {
+            if (col_responsible(submatrix_to_elaborate, world_rank)) {
                 cbg_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
                 row_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
@@ -169,8 +169,8 @@ int main(int argc, char** argv) {
                 print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
                 double_dense_matrix alfa_i;
                 
-                if (row_responsible(working_submatrix, world_rank)) {
-                    log_trace("%d col_process_list.num_subprocesses %d\n", world_rank, row_process_list.num_subprocesses);
+                if (col_responsible(working_submatrix, world_rank)) {
+                    log_trace("%d col_process_list.num_subprocesses %d\n", world_rank, col_process_list.num_subprocesses);
                     log_trace("%d Aggregate sum result (before):\n", world_rank);
                     print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
                     aggregate_sum_results(sum_result, col_process_list, MPI_COMM_WORLD);
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
                 log_trace("%d Sum result:\n", world_rank);
                 print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
                 double_dense_matrix alfa_i;
-                if (col_responsible(working_submatrix, world_rank)) {
+                if (row_responsible(working_submatrix, world_rank)) {
                     log_trace("%d row_process_list.num_subprocesses %d\n", world_rank, row_process_list.num_subprocesses);
                     log_trace("%d Aggregate sum result (before):\n", world_rank);
                     print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
