@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
                 print_dense_matrix(alfa_i);///////////////////////////////////////////////////////////////////
                 // new_w = sparse_dense_vector_mul(last_w, alfa_i)
                 multiply_coefficient_by_rows(alfa_i, working_submatrix);
-                printf("Multiply coefficient by rows:");
+                log_trace("Multiply coefficient by rows:");
                 util_print_submatrix(working_submatrix);////////////////////////////////////////////////////////////////////
                 clean_double_dense_matrix(&alfa_i);
             }
