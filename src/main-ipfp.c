@@ -11,17 +11,6 @@
 
 #define NUM_ITERATIONS 5
 
-
-/*   100  40
-    _________
-140 | 50  20
-
-
-*/
-
-
-
-
 int main(int argc, char** argv) {
     if (argc != 5) {
         printf("Usage: distributedIPFP [aggregate_visit_matrix] [week_poi_marginals] [week_cbg_marginals] [output_dir]\n");
@@ -266,8 +255,6 @@ int main(int argc, char** argv) {
         }
 
         clean_submatrix(&working_submatrix);
-
-        break;
     }
     
     if(world_rank == 0) {
