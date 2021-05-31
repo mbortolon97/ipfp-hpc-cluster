@@ -37,6 +37,15 @@ struct factor_list factorize(int n) {
     struct factor_list list;
     list.last_element = NULL;
     list.first_element = NULL;
+    if (n == 1) {
+        struct factor_list_element* new_element = malloc(sizeof(struct factor_list_element));
+        new_element->next = NULL;
+        new_element->factor = 1;
+        new_element->previous = NULL;
+        list.last_element = new_element;
+        list.first_element = new_element;
+        return list;
+    }
     while (n > 1)
     {
         while (n % factor != 0)
@@ -82,6 +91,7 @@ submatrix_partition number_of_submatrices(int n_processes, int n_rows, int n_col
     if (list.first_element->next == NULL && n_processes > 3) {
         list = factorize(n_processes - 1);
     }
+    
 
     // calculating how to divide the matrix
     ideal_rateo = ((double)n_rows) / (double)n_cols;

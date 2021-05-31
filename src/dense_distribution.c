@@ -108,7 +108,7 @@ void aggregate_sum_results(double_dense_matrix sum_result, const process_list li
     double_dense_matrix receiving_buffer = create_double_dense_matrix(sum_result.n_rows, sum_result.n_cols);
     int i, j;
     for (i = 0; i < list.num_subprocesses; i++) {
-        MPI_Recv(receiving_buffer.matrix, sum_result.n_rows * sum_result.n_cols, MPI_DOUBLE, MPI_ANY_SOURCE, SEND_SUM_RESULTS, comm, &status);
+        MPI_Recv(receiving_buffer.matrix, sum_result.n_rows * sum_result.n_cols, MPI_DOUBLE, list.processes_id[i], SEND_SUM_RESULTS, comm, &status);
         for (j = 0; j < sum_result.n_rows * sum_result.n_cols; j++) {
             sum_result.matrix[j] += receiving_buffer.matrix[j];
         }

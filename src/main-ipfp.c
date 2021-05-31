@@ -9,7 +9,7 @@
 #include "dense_distribution.h"
 #include "log.h"
 
-#define NUM_ITERATIONS 5
+#define NUM_ITERATIONS 100
 
 int main(int argc, char** argv) {
     if (argc != 5) {
@@ -74,19 +74,31 @@ int main(int argc, char** argv) {
 
     int hours;
 
+    
     if (world_rank == 0) {
+        float t_start_io_operation = MPI_Wtime();
         // load matrices from files
         aggregate_visit_matrix = load_double_sparse_matrix(argv[1]);
         poi_marginals_matrix = load_double_sparse_matrix(argv[2]);
         cbg_marginals_matrix = load_double_dense_matrix(argv[3]);
 
+        float io_time = MPI_Wtime() - t_start_io_operation;
+        printf("io_time: %f\n", io_time);
+
+        float t_start_permutation_operations = MPI_Wtime();
         // permute and get partitions
         permutation = create_sparse_matrix_random_permutation(aggregate_visit_matrix);
         permutated_aggregate_visit_matrix = permutate_double_sparse_matrix(permutation, aggregate_visit_matrix);
         partition = create_submatrix_partition(world_size, permutated_aggregate_visit_matrix.n_rows, permutated_aggregate_visit_matrix.n_cols);
+        float permutation_time = MPI_Wtime() - t_start_permutation_operations;
+        printf("permutation_time: %f\n", permutation_time);
 
+        float t_start_distribution_operations = MPI_Wtime();
         // send submatrices to other processes
         submatrix_to_elaborate = distribute_sparse_matrix(&partition, permutated_aggregate_visit_matrix); // TODO: replace with the permutated
+
+        float distribution_operations_time = MPI_Wtime() - t_start_distribution_operations;
+        printf("distribution_operations_time: %f\n", distribution_operations_time);
         
         clean_sparse_matrix(&aggregate_visit_matrix);
         hours = poi_marginals_matrix.n_cols;
@@ -94,11 +106,15 @@ int main(int argc, char** argv) {
         // receive submatrix from process_0
         submatrix_to_elaborate = wait_for_sparse_matrix();
     }
+    
 
     MPI_Bcast(&hours, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
+    float average_per_hour = 0.0;
+    float average_saving_operations = 0.0;
     // for every hour compute IPFP
     for (int i = 0; i < hours; i++) {
+        float start_time_hour = MPI_Wtime();
         // vectors that will be used in IPFP (marginal sums of rows/cols)
         
         double_dense_matrix poi_marginals_at_hour_responsible;
@@ -192,9 +208,14 @@ int main(int argc, char** argv) {
             double_sparse_matrix permutated_corrected_matrix = group_submatrices(working_submatrix, &aggregate_visit_matrix, partition.subp_cols*partition.subp_rows, partition.n_elements_biggest_partition);
             double_sparse_matrix corrected_matrix = inverse_double_sparse_matrix_permutation(permutation, permutated_corrected_matrix);
             clean_sparse_matrix(&permutated_corrected_matrix);
+            
+            float t_saving_operation_start_time = MPI_Wtime();
             char str[512];
             sprintf(str, "%s/save_result_%d.txt", argv[4], i);
             save_double_sparse_matrix(str, corrected_matrix);
+            float saving_operations_time = MPI_Wtime() - t_saving_operation_start_time;
+            printf("Saving time: %f\n", saving_operations_time);
+            average_saving_operations += saving_operations_time;
             clean_sparse_matrix(&corrected_matrix);
         } else {
             // the other process send the submatrices to the main process
@@ -202,6 +223,18 @@ int main(int argc, char** argv) {
         }
 
         clean_submatrix(&working_submatrix);
+
+        if (world_rank == 0) {
+            float hour_time = MPI_Wtime() - start_time_hour;
+            printf("Time per hour: %f\n", hour_time);
+            average_per_hour += hour_time;
+        }
+        
+    }
+
+    if (world_rank == 0) {
+        printf("Average time per hour: %f\n", average_per_hour / hours);
+        printf("Average saving time per hour: %f\n", average_saving_operations / hours);
     }
     
     if(world_rank == 0) {
