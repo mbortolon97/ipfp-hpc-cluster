@@ -38,4 +38,6 @@ void set_to_one_less_than_epsilon(double_dense_matrix matrix);
 **/
 double_dense_matrix elementwise_division(const double_dense_matrix matrix1, const double_dense_matrix matrix2);
 
+void print_dense_matrix(const double_dense_matrix matrix);
+
 #endif

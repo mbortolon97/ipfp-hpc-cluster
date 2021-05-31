@@ -151,11 +151,9 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
                 partition.row_master[i].num_subprocesses++;
             }
             if (partition.col_master[j].col_master_process_id == -1) {
-                printf("Set %d as col master for col %d\n", j, process_id);
                 partition.col_master[j].col_master_process_id = process_id;
             } else {
-                printf("Add process %d as col master for col %d\n", j, process_id);
-                partition.col_master[j].col_processes_id[partition.row_master[j].num_subprocesses] = process_id;
+                partition.col_master[j].col_processes_id[partition.col_master[j].num_subprocesses] = process_id;
                 partition.col_master[j].num_subprocesses++;
             }
             partition.assignments[process_id].start_row = n_rows_per_process * i;
@@ -166,7 +164,6 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
             partition.assignments[process_id].start_col = n_cols_per_process * j;
             partition.assignments[process_id].stop_col = n_cols_per_process * (j + 1);
             if (j == partition.subp_cols - 1) {
-                printf("%d Increment stop col by %d\n", process_id, n_cols - (partition.subp_cols * n_cols_per_process));
                 partition.assignments[process_id].stop_col += n_cols - (partition.subp_cols * n_cols_per_process);
             }
 

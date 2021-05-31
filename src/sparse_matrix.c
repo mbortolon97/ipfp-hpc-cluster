@@ -28,10 +28,12 @@ double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col)
     double_dense_matrix result_matrix = create_double_dense_matrix(matrix.n_rows, 1);
     int i;
     for (int i = 0; i < matrix.n_rows; i++) {
-        result_matrix.matrix[i] = 0;
+        result_matrix.matrix[i] = 0.0;
     }
     for (i = 0; i < matrix.n_elements; i++) {
-        result_matrix.matrix[matrix.rows[i]] += (matrix.cols[i] == col) * matrix.values[i];
+        if (matrix.cols[i] == col) {
+            result_matrix.matrix[matrix.rows[i]] += matrix.values[i];
+        }
     }
     return result_matrix;
 }
@@ -88,6 +90,6 @@ void save_double_sparse_matrix(const char *filename, double_sparse_matrix matrix
     // write elements
     for (int i = 0; i < matrix.n_elements; i++)
     {
-        fprintf(out_file, "%d %d %lf\n", matrix.rows[i], matrix.cols[i], matrix.values[i]);
+        fprintf(out_file, "%d %d %e\n", matrix.rows[i], matrix.cols[i], matrix.values[i]);
     }
 }

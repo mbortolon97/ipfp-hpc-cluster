@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <float.h>
 
+#include "log.h"
+
 /**
  * This function return a new dense matrix with the given size
  **/ 
@@ -38,7 +40,10 @@ void set_to_one_less_than_epsilon(double_dense_matrix matrix) {
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
         for (j = 0; j < matrix.n_cols; j++) {
-            matrix.matrix[i * matrix.n_cols + j] = matrix.matrix[i * matrix.n_cols + j] < DBL_EPSILON * 1.0 + matrix.matrix[i * matrix.n_cols + j] > DBL_EPSILON * matrix.matrix[i * matrix.n_cols + j];
+            if (matrix.matrix[i * matrix.n_cols + j] < DBL_EPSILON) {
+                matrix.matrix[i * matrix.n_cols + j] = 1.0;
+            }
+            // matrix.matrix[i * matrix.n_cols + j] = (matrix.matrix[i * matrix.n_cols + j] < DBL_EPSILON) * 1.0 + (matrix.matrix[i * matrix.n_cols + j] > DBL_EPSILON) * matrix.matrix[i * matrix.n_cols + j];
         }
     }
 }
@@ -60,6 +65,16 @@ double_dense_matrix elementwise_division(const double_dense_matrix matrix1, cons
     }
 
     return result_matrix;
+}
+
+void print_dense_matrix(const double_dense_matrix matrix) {
+    int i, j;
+    for (i = 0; i < matrix.n_rows; i++) {
+        for (j = 0; j < matrix.n_cols; j++) {
+            log_trace("%e ", matrix.matrix[i * matrix.n_cols + j]);
+        }
+        log_trace("\n");
+    }
 }
 
 /**

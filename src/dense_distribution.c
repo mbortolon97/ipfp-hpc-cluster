@@ -57,7 +57,6 @@ process_list distribute_row_processes_list(const submatrix_partition partition, 
             list.processes_id = malloc(sizeof(int) * list.num_subprocesses);
             memcpy(list.processes_id, partition.row_master[i].row_processes_id, sizeof(int) * list.num_subprocesses);
         } else {
-            printf("Sending row process list to %d, num processes %d, first example %d\n", partition.row_master[i].row_master_process_id, partition.row_master[i].num_subprocesses, partition.row_master[i].row_processes_id[0]);
             MPI_Send(&(partition.row_master[i].num_subprocesses), 1, MPI_INT, partition.row_master[i].row_master_process_id, SEND_PROCESS_LIST_N_PROC, comm);
             MPI_Send(partition.row_master[i].row_processes_id, partition.row_master[i].num_subprocesses, MPI_INT, partition.row_master[i].row_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
         }
@@ -107,23 +106,18 @@ double_dense_matrix receive_double_dense_matrix(int source, MPI_Comm comm) {
 void aggregate_sum_results(double_dense_matrix sum_result, const process_list list, MPI_Comm comm) {
     MPI_Status status;
     double_dense_matrix receiving_buffer = create_double_dense_matrix(sum_result.n_rows, sum_result.n_cols);
-    printf("create matrix\n");
     int i, j;
     for (i = 0; i < list.num_subprocesses; i++) {
-        printf("Waiting data\n");
         MPI_Recv(receiving_buffer.matrix, sum_result.n_rows * sum_result.n_cols, MPI_DOUBLE, MPI_ANY_SOURCE, SEND_SUM_RESULTS, comm, &status);
-        printf("Receive message %d\n", i);
         for (j = 0; j < sum_result.n_rows * sum_result.n_cols; j++) {
             sum_result.matrix[j] += receiving_buffer.matrix[j];
         }
     }
-    printf("Cleaning\n");
     clean_double_dense_matrix(&receiving_buffer);
 }
 
 void send_sum_results(double_dense_matrix sum_result, int dest, MPI_Comm comm) {
     MPI_Send(sum_result.matrix, sum_result.n_rows * sum_result.n_cols, MPI_DOUBLE, dest, SEND_SUM_RESULTS, comm);
-    printf("Send sum results\n");
 }
 
 void distribute_dense_matrix_to_processes(double_dense_matrix matrix, process_list list, MPI_Comm comm) {

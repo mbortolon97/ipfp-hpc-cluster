@@ -157,16 +157,13 @@ double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix) {
 
 double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix) {
     double_dense_matrix result_matrix = create_double_dense_matrix(submatrix.stop_row - submatrix.start_row, 1);
-    printf("Sum matrix along cols\n");
     int i;
     for (i = 0; i < submatrix.stop_row - submatrix.start_row; i++) {
         result_matrix.matrix[i] = 0.0;
     }
-    printf("Set to zero\n");
     for (i = 0; i < submatrix.n_elements; i++) {
         result_matrix.matrix[submatrix.elements[i].row] += submatrix.elements[i].val;
     }
-    printf("Summed\n");
     return result_matrix;
 }
 
@@ -199,24 +196,29 @@ submatrix clone_submatrix(const submatrix original_submatrix){
 void send_submatrices(submatrix working_submatrix){
     MPI_Datatype mpi_tuple;
     build_mpi_tuple(&mpi_tuple);
-
+    printf("[n] before removal reached\n");
     int i;
     for (i = 0; i < working_submatrix.n_elements; i++) {
         working_submatrix.elements[i].row += working_submatrix.start_row;
         working_submatrix.elements[i].col += working_submatrix.start_col;
     }
-
+    printf("[n] before sending reached\n");
     MPI_Send( working_submatrix.elements , working_submatrix.n_elements+1 , mpi_tuple , 0 , 0 , MPI_COMM_WORLD);
+    printf("[n] after sending reached\n");
 }
 
 double_sparse_matrix group_submatrices(submatrix working_submatrix, double_sparse_matrix* original_matrix, const int n_processes, const int n_elements_biggest_sumbatrix){
+    printf("[0]  entered function\n");
     double_sparse_matrix results = create_double_sparse_matrix(original_matrix->n_rows, original_matrix->n_cols, original_matrix->n_elements);
-    struct mpi_matrix_element buffer[n_elements_biggest_sumbatrix+1];
+    printf("[0]  allocated memory\n");
+    struct mpi_matrix_element* buffer = malloc((n_elements_biggest_sumbatrix+1) * sizeof(struct mpi_matrix_element));
+    printf("[0]  allocated buffer\n");
     int index = 0;
     MPI_Status status;
     MPI_Datatype mpi_tuple;
     build_mpi_tuple(&mpi_tuple);
 
+    printf("[0]  saving local submatrix\n");
     // add the results of the local working_submatrix
     for (int j=0; j<working_submatrix.n_elements; j++){
         results.rows[index] = working_submatrix.elements[j].row;
@@ -225,10 +227,14 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
         index++;
     }
 
+    printf("[0]  receiving...\n");
     // receive results from the other processes
     for (int i = 1; i< n_processes; i++){
         int j = 0;
+        printf("[0]  receiving...\n");
         MPI_Recv( buffer , n_elements_biggest_sumbatrix+1 , mpi_tuple , i , 0 , MPI_COMM_WORLD , &status);
+        printf("[0]  received\n");
+
         while (buffer[j].row!=-1){
             results.rows[index] = buffer[j].row;
             results.cols[index] = buffer[j].col;
@@ -238,6 +244,7 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
         }
         // add element to results;
     }
+    free(buffer);
     return results;
 }
 
