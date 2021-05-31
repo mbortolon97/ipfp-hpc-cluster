@@ -136,15 +136,18 @@ int main(int argc, char** argv) {
             // receive broadcast
             if (row_responsible(submatrix_to_elaborate, world_rank)) {
                 poi_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
-                col_process_list = receive_process_list(0, MPI_COMM_WORLD);
+                row_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
             if (col_responsible(submatrix_to_elaborate, world_rank)) {
                 cbg_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
-                row_process_list = receive_process_list(0, MPI_COMM_WORLD);
+                col_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
         }
         // create a copy of the submatrix (one copy for each hour) 
         submatrix working_submatrix = clone_submatrix(submatrix_to_elaborate);
+
+        log_trace("%d row_responsible %d\n", world_rank, working_submatrix.row_responsible);
+        log_trace("%d col_responsible %d\n", world_rank, working_submatrix.col_responsible);
 
         int e = 0;
 
