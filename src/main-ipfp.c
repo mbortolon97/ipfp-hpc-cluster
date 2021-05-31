@@ -7,7 +7,6 @@
 #include "matrix_partition.h"
 #include "submatrix.h"
 #include "dense_distribution.h"
-#include "log.h"
 
 #define NUM_ITERATIONS 100
 
@@ -35,20 +34,6 @@ int main(int argc, char** argv) {
 	int world_size, world_rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
-    char log_filename[120];
-    sprintf(log_filename, "log_%d.txt", world_rank);
-    // load file
-    FILE *in_file = fopen(log_filename, "w");
-
-    // check file was opened correctly
-    if (in_file == NULL)
-    {
-        printf("Error! Could not open file\n");
-        exit(-1);
-    }
-
-    log_add_fp(in_file, 0);
     
     if(check_number_of_processes(&world_size, &world_rank)){
         MPI_Finalize();
@@ -229,7 +214,6 @@ int main(int argc, char** argv) {
             printf("Time per hour: %f\n", hour_time);
             average_per_hour += hour_time;
         }
-        
     }
 
     if (world_rank == 0) {
