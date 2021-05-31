@@ -115,10 +115,13 @@ int main(int argc, char** argv) {
             if (row_responsible(submatrix_to_elaborate, world_rank)) {
                 poi_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
                 row_process_list = receive_process_list(0, MPI_COMM_WORLD);
+                printf("%d row_process_list processes: %d, first value: %d\n", world_rank, row_process_list.num_subprocesses, row_process_list.processes_id[0]);
+                
             }
             if (col_responsible(submatrix_to_elaborate, world_rank)) {
                 cbg_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
                 col_process_list = receive_process_list(0, MPI_COMM_WORLD);
+                printf("%d col_process_list processes: %d, first_value: %d\n", world_rank, col_process_list.num_subprocesses, col_process_list.processes_id[0]);
             }
         }
         // create a copy of the submatrix (one copy for each hour) 
@@ -127,39 +130,11 @@ int main(int argc, char** argv) {
         printf("%d Complete success %d %d %d %d\n", world_rank, working_submatrix.start_row, working_submatrix.stop_row, working_submatrix.start_col, working_submatrix.stop_col);
 
         for (int i = 0; i < NUM_ITERATIONS; i++) {
-            
+            printf("%d ITERATION %d\n", world_rank, i);
             if (i % 2 == 1) {
                 printf("%d", world_rank);
                 // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
-                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix);
-                printf("%d Sum along axis: %d %d\n", world_rank, sum_result.n_rows, sum_result.n_cols);
-                double_dense_matrix alfa_i;
-                if (row_responsible(working_submatrix, world_rank)) {
-                    aggregate_sum_results(sum_result, row_process_list, MPI_COMM_WORLD);
-                    printf("Aggregate sum result\n");
-                    // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
-                    set_to_one_less_than_epsilon(sum_result);
-                    printf("%d Set one on epsilon\n", world_rank);
-                    // alfa_i = cbg_marginals_u / last_w_axis_sum
-                    alfa_i = elementwise_division(cbg_marginals_at_hour_responsible, sum_result);
-                    printf("%d Elaborate coefficient %d %d\n", world_rank, alfa_i.n_rows, alfa_i.n_cols);
-                    distribute_dense_matrix_to_processes(alfa_i, row_process_list, MPI_COMM_WORLD);
-                    printf("%d send coefficient\n", world_rank);
-                } else {
-                    send_sum_results(sum_result, working_submatrix.row_responsible, MPI_COMM_WORLD);
-                    printf("Send sum result\n");
-                    alfa_i = receive_double_dense_matrix(working_submatrix.row_responsible, MPI_COMM_WORLD);
-                    printf("%d Receive coefficient %d %d\n", world_rank, alfa_i.n_rows, alfa_i.n_cols);
-                }
-                clean_double_dense_matrix(&sum_result);
-                // new_w = sparse_dense_vector_mul(last_w, alfa_i)
-                multiply_coefficient_by_cols(alfa_i, working_submatrix);
-                printf("%d multiply coefficients\n", world_rank);
-                clean_double_dense_matrix(&alfa_i);
-            } else {
-                printf("%d summing along cols\n", world_rank);
-                // last_w_axis_sum = torch.sparse.sum(last_w, dim=1).to_dense()
-                double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix);
+                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix); // TODO: replace rows with cols without changing implementation
                 printf("%d Sum along axis: %d %d\n", world_rank, sum_result.n_rows, sum_result.n_cols);
                 double_dense_matrix alfa_i;
                 if (col_responsible(working_submatrix, world_rank)) {
@@ -169,14 +144,43 @@ int main(int argc, char** argv) {
                     set_to_one_less_than_epsilon(sum_result);
                     printf("%d Set one on epsilon\n", world_rank);
                     // alfa_i = cbg_marginals_u / last_w_axis_sum
-                    alfa_i = elementwise_division(poi_marginals_at_hour_responsible, sum_result);
-                    printf("%d Elaborate coefficient %d %d\n", world_rank, alfa_i.n_rows, alfa_i.n_cols);
+                    alfa_i = elementwise_division(cbg_marginals_at_hour_responsible, sum_result);
+                    printf("%d Elaborate coefficient data %d %d\n", world_rank, alfa_i.n_rows, alfa_i.n_cols);
                     distribute_dense_matrix_to_processes(alfa_i, col_process_list, MPI_COMM_WORLD);
                     printf("%d send coefficient\n", world_rank);
                 } else {
                     send_sum_results(sum_result, working_submatrix.col_responsible, MPI_COMM_WORLD);
-                    printf("%d Send sum result\n", world_rank);
+                    printf("Send sum result\n");
                     alfa_i = receive_double_dense_matrix(working_submatrix.col_responsible, MPI_COMM_WORLD);
+                    printf("%d Receive coefficient %d %d\n", world_rank, alfa_i.n_rows, alfa_i.n_cols);
+                }
+                clean_double_dense_matrix(&sum_result);
+                // new_w = sparse_dense_vector_mul(last_w, alfa_i)
+                multiply_coefficient_by_cols(alfa_i, working_submatrix);
+                printf("%d multiply coefficients\n", world_rank);
+                clean_double_dense_matrix(&alfa_i);
+            } else {
+                printf("%d summing along cols, responsible %d\n", world_rank, working_submatrix.row_responsible);
+                // last_w_axis_sum = torch.sparse.sum(last_w, dim=1).to_dense()
+                double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix); // TODO: replace cols with rows without changing implementation
+                printf("%d Sum along cols: %d %d\n", world_rank, sum_result.n_rows, sum_result.n_cols);
+                double_dense_matrix alfa_i;
+                if (row_responsible(working_submatrix, world_rank)) {
+                    aggregate_sum_results(sum_result, row_process_list, MPI_COMM_WORLD);
+                    printf("Aggregate sum result\n");
+                    // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
+                    set_to_one_less_than_epsilon(sum_result);
+                    printf("%d Set one on epsilon\n", world_rank);
+                    // alfa_i = cbg_marginals_u / last_w_axis_sum
+                    printf("%d elementwise_division, input1: %d %d, input2: %d %d\n", world_rank, poi_marginals_at_hour_responsible.n_rows, poi_marginals_at_hour_responsible.n_cols, sum_result.n_rows, sum_result.n_cols);
+                    alfa_i = elementwise_division(poi_marginals_at_hour_responsible, sum_result);
+                    printf("%d Elaborate coefficient %d %d\n", world_rank, alfa_i.n_rows, alfa_i.n_cols);
+                    distribute_dense_matrix_to_processes(alfa_i, row_process_list, MPI_COMM_WORLD);
+                    printf("%d send coefficient\n", world_rank);
+                } else {
+                    send_sum_results(sum_result, working_submatrix.row_responsible, MPI_COMM_WORLD);
+                    printf("%d Send sum result\n", world_rank);
+                    alfa_i = receive_double_dense_matrix(working_submatrix.row_responsible, MPI_COMM_WORLD);
                     printf("%d Receive coefficient %d %d\n", world_rank, alfa_i.n_rows, alfa_i.n_cols);
                 }
                 clean_double_dense_matrix(&sum_result);

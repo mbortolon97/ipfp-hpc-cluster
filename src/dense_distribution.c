@@ -57,8 +57,9 @@ process_list distribute_row_processes_list(const submatrix_partition partition, 
             list.processes_id = malloc(sizeof(int) * list.num_subprocesses);
             memcpy(list.processes_id, partition.row_master[i].row_processes_id, sizeof(int) * list.num_subprocesses);
         } else {
+            printf("Sending row process list to %d, num processes %d, first example %d\n", partition.row_master[i].row_master_process_id, partition.row_master[i].num_subprocesses, partition.row_master[i].row_processes_id[0]);
             MPI_Send(&(partition.row_master[i].num_subprocesses), 1, MPI_INT, partition.row_master[i].row_master_process_id, SEND_PROCESS_LIST_N_PROC, comm);
-            MPI_Send(&(partition.row_master[i].row_processes_id), partition.row_master[i].num_subprocesses, MPI_INT, partition.row_master[i].row_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
+            MPI_Send(partition.row_master[i].row_processes_id, partition.row_master[i].num_subprocesses, MPI_INT, partition.row_master[i].row_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
         }
     }
     return list;
@@ -74,7 +75,7 @@ process_list distribute_col_processes_list(const submatrix_partition partition, 
             memcpy(list.processes_id, partition.col_master[i].col_processes_id, sizeof(int) * list.num_subprocesses);
         } else {
             MPI_Send(&(partition.col_master[i].num_subprocesses), 1, MPI_INT, partition.col_master[i].col_master_process_id, SEND_PROCESS_LIST_N_PROC, comm);
-            MPI_Send(&(partition.col_master[i].col_processes_id), partition.col_master[i].num_subprocesses, MPI_INT, partition.col_master[i].col_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
+            MPI_Send(partition.col_master[i].col_processes_id, partition.col_master[i].num_subprocesses, MPI_INT, partition.col_master[i].col_master_process_id, SEND_PROCESS_LIST_PROCESSES, comm);
         }
     }
     return list;

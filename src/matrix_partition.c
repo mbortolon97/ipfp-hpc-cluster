@@ -124,16 +124,22 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
     for (i = 0; i < partition.subp_rows; i++) {
         partition.row_master[i].start_row = n_rows_per_process * i;
         partition.row_master[i].stop_row = n_rows_per_process * (i + 1);
+        if (i == partition.subp_rows - 1) {
+            partition.row_master[i].stop_row += n_rows - (partition.subp_rows * n_rows_per_process);
+        }
         partition.row_master[i].row_master_process_id = -1;
         partition.row_master[i].num_subprocesses = 0;
-        partition.row_master[i].row_processes_id = malloc(partition.subp_cols * sizeof(int));
+        partition.row_master[i].row_processes_id = malloc((partition.subp_cols - 1) * sizeof(int));
     }
     for (j = 0; j < partition.subp_cols; j++) {
         partition.col_master[j].start_col = n_cols_per_process * j;
         partition.col_master[j].stop_col = n_cols_per_process * (j + 1);
+        if (j == partition.subp_cols - 1) {
+            partition.assignments[process_id].stop_col += n_cols - (partition.subp_cols * n_cols_per_process);
+        }
         partition.col_master[j].col_master_process_id = -1;
         partition.col_master[j].num_subprocesses = 0;
-        partition.col_master[j].col_processes_id = malloc(partition.subp_rows * sizeof(int));
+        partition.col_master[j].col_processes_id = malloc((partition.subp_rows - 1) * sizeof(int));
     }
     for (i = 0; i < partition.subp_rows; i++) {
 
@@ -145,8 +151,10 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
                 partition.row_master[i].num_subprocesses++;
             }
             if (partition.col_master[j].col_master_process_id == -1) {
+                printf("Set %d as col master for col %d\n", j, process_id);
                 partition.col_master[j].col_master_process_id = process_id;
             } else {
+                printf("Add process %d as col master for col %d\n", j, process_id);
                 partition.col_master[j].col_processes_id[partition.row_master[j].num_subprocesses] = process_id;
                 partition.col_master[j].num_subprocesses++;
             }
@@ -158,6 +166,7 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
             partition.assignments[process_id].start_col = n_cols_per_process * j;
             partition.assignments[process_id].stop_col = n_cols_per_process * (j + 1);
             if (j == partition.subp_cols - 1) {
+                printf("%d Increment stop col by %d\n", process_id, n_cols - (partition.subp_cols * n_cols_per_process));
                 partition.assignments[process_id].stop_col += n_cols - (partition.subp_cols * n_cols_per_process);
             }
 
