@@ -1,0 +1,94 @@
+2021-05-31 21:14:43 TRACE main-ipfp.c:84: aggregate_visit_matrix: 1 2
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:85: poi_marginals_matrix: 1 2
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:86: cbg_marginals_matrix: 1 1
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:103: 0 start_col: 0 1 0 1
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:149: [0] init iteration 50.000000
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:155: 0 Sum result:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 5.000000e+01 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:160: 0 col_process_list.num_subprocesses 0
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:161: 0 Aggregate sum result (before):
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 5.000000e+01 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:164: 0 Aggregate sum result:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 5.000000e+01 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:168: 0 Set one less than epsilon:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 5.000000e+01 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:171: 0 Cbg marginal at hour responsible:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 6.944971e-310 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:175: 0 Elementwise division:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 1.388994e-311 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:183: [0] before multipl by alpha 50.000000
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:186: alfa_i   values...
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 1.388994e-311 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:149: [0] init iteration 0.000000
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:149: [0] init iteration 0.000000
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:155: 0 Sum result:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 0.000000e+00 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:160: 0 col_process_list.num_subprocesses 0
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:161: 0 Aggregate sum result (before):
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 0.000000e+00 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:164: 0 Aggregate sum result:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 0.000000e+00 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:168: 0 Set one less than epsilon:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 1.000000e+00 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:171: 0 Cbg marginal at hour responsible:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 6.944971e-310 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:175: 0 Elementwise division:
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 6.944971e-310 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:183: [0] before multipl by alpha 0.000000
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:186: alfa_i   values...
+
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:74: 6.944971e-310 
+2021-05-31 21:14:43 TRACE ./dense_matrix.c:76: 
+
+2021-05-31 21:14:43 TRACE main-ipfp.c:149: [0] init iteration 0.000000
+
