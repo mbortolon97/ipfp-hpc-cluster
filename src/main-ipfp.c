@@ -95,8 +95,6 @@ int main(int argc, char** argv) {
         submatrix_to_elaborate = wait_for_sparse_matrix();
     }
 
-    log_trace("%d start_col: %d %d %d %d\n", world_rank, submatrix_to_elaborate.start_col, submatrix_to_elaborate.stop_col, submatrix_to_elaborate.start_row, submatrix_to_elaborate.stop_row);
-
     MPI_Bcast(&hours, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     // for every hour compute IPFP
@@ -140,7 +138,6 @@ int main(int argc, char** argv) {
         int e = 0;
 
         for (int i = 1; i < NUM_ITERATIONS; i++) {
-
             if (i % 2 == 1) {
                 // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
                 double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix); // TODO: replace rows with cols without changing implementation
@@ -152,20 +149,18 @@ int main(int argc, char** argv) {
                     set_to_one_less_than_epsilon(sum_result);
                     // alfa_i = cbg_marginals_u / last_w_axis_sum
                     alfa_i = elementwise_division(cbg_marginals_at_hour_responsible, sum_result);
-                                        
                     distribute_dense_matrix_to_processes(alfa_i, col_process_list, MPI_COMM_WORLD);
                 } else {
                     send_sum_results(sum_result, working_submatrix.col_responsible, MPI_COMM_WORLD);
                     alfa_i = receive_double_dense_matrix(working_submatrix.col_responsible, MPI_COMM_WORLD);
                 }
-                if (world_rank==0) 
                 clean_double_dense_matrix(&sum_result);
                 // new_w = sparse_dense_vector_mul(last_w, alfa_i)
                 multiply_coefficient_by_cols(alfa_i, working_submatrix);
                 clean_double_dense_matrix(&alfa_i);
             } else {
                 // last_w_axis_sum = torch.sparse.sum(last_w, dim=1).to_dense()
-                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix); // TODO: replace cols with rows without changing implementation
+                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix);
                 double_dense_matrix alfa_i;
                 if (row_responsible(working_submatrix, world_rank)) {
                     aggregate_sum_results(sum_result, row_process_list, MPI_COMM_WORLD);
