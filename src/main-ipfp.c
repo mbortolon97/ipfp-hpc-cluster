@@ -80,19 +80,15 @@ int main(int argc, char** argv) {
         poi_marginals_matrix = load_double_sparse_matrix(argv[2]);
         cbg_marginals_matrix = load_double_dense_matrix(argv[3]);
 
-        log_trace("aggregate_visit_matrix: %d %d\n", aggregate_visit_matrix.n_rows, aggregate_visit_matrix.n_cols);
-        log_trace("poi_marginals_matrix: %d %d\n", poi_marginals_matrix.n_rows, poi_marginals_matrix.n_cols);
-        log_trace("cbg_marginals_matrix: %d %d\n", cbg_marginals_matrix.n_rows, cbg_marginals_matrix.n_cols);
-
         // permute and get partitions
         permutation = create_sparse_matrix_random_permutation(aggregate_visit_matrix);
         permutated_aggregate_visit_matrix = permutate_double_sparse_matrix(permutation, aggregate_visit_matrix);
         partition = create_submatrix_partition(world_size, permutated_aggregate_visit_matrix.n_rows, permutated_aggregate_visit_matrix.n_cols);
 
         // send submatrices to other processes
-        submatrix_to_elaborate = distribute_sparse_matrix(&partition, aggregate_visit_matrix); // TODO: replace with the permutated
+        submatrix_to_elaborate = distribute_sparse_matrix(&partition, permutated_aggregate_visit_matrix); // TODO: replace with the permutated
         
-        // clean_sparse_matrix(&aggregate_visit_matrix); /////////////////////////////////////////////////////////////////////////////////
+        clean_sparse_matrix(&aggregate_visit_matrix);
         hours = poi_marginals_matrix.n_cols;
     } else {
         // receive submatrix from process_0
@@ -122,13 +118,13 @@ int main(int argc, char** argv) {
             print_dense_matrix(cbg_marginals_at_hour_not_perm);///////////////////////////////////////////////////////////////////
             double_dense_matrix cbg_marginals_at_hour = permutate_double_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm);
             double_dense_matrix poi_marginals_at_hour = permutate_double_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
-            // clean_double_dense_matrix(&poi_marginals_at_hour_not_perm); ////////////////////////////////////////////////////////////////////////////////////////////////
-            // clean_double_dense_matrix(&cbg_marginals_at_hour_not_perm); ////////////////////////////////////////////////////////////////////////////////////////////////
+            clean_double_dense_matrix(&poi_marginals_at_hour_not_perm); ////////////////////////////////////////////////////////////////////////////////////////////////
+            clean_double_dense_matrix(&cbg_marginals_at_hour_not_perm); ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, poi_marginals_at_hour_not_perm, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
+            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, poi_marginals_at_hour, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
             clean_double_dense_matrix(&poi_marginals_at_hour);
             col_process_list = distribute_col_processes_list(partition, world_rank, MPI_COMM_WORLD);
-            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, cbg_marginals_at_hour_not_perm, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
+            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, cbg_marginals_at_hour, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
             clean_double_dense_matrix(&cbg_marginals_at_hour);
             row_process_list = distribute_row_processes_list(partition, world_rank, MPI_COMM_WORLD);
         } else {
@@ -265,5 +261,5 @@ int main(int argc, char** argv) {
     }
 	
     MPI_Finalize();
-    return 1;
+    return 0;
 }
