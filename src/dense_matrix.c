@@ -80,9 +80,9 @@ void print_dense_matrix(const double_dense_matrix matrix) {
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
         for (j = 0; j < matrix.n_cols; j++) {
-            log_trace("%e ", matrix.matrix[i * matrix.n_cols + j]);
+            printf("%e ", matrix.matrix[i * matrix.n_cols + j]);
         }
-        log_trace("\n");
+        printf("\n");
     }
 }
 
