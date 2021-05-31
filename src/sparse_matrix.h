@@ -38,4 +38,9 @@ void save_double_sparse_matrix(const char *filename, double_sparse_matrix matrix
  **/ 
 double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col);
 
+/**
+ * This function extract as a dense matrix a row
+ **/ 
+double_dense_matrix get_row_as_dense(const double_sparse_matrix matrix, int row);
+
 #endif

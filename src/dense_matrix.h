@@ -29,6 +29,11 @@ double_dense_matrix load_double_dense_matrix(const char *filename);
 double_dense_matrix get_row_from_dense(double_dense_matrix matrix, int row);
 
 /**
+ * This function get a col as a dense matrix
+ **/
+double_dense_matrix get_col_from_dense(double_dense_matrix matrix, int col);
+
+/**
  * This function set to one all the value below epsilon, work in place
  **/
 void set_to_one_less_than_epsilon(double_dense_matrix matrix);

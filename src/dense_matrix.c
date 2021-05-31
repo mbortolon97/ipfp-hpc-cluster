@@ -36,11 +36,20 @@ double_dense_matrix get_row_from_dense(double_dense_matrix matrix, int row) {
     return result_matrix;
 }
 
+double_dense_matrix get_col_from_dense(double_dense_matrix matrix, int col) {
+    int i;
+    double_dense_matrix result_matrix = create_double_dense_matrix(matrix.n_rows, 1);
+    for (i = 0; i < matrix.n_rows; i++) {
+        result_matrix.matrix[i] = matrix.matrix[i * matrix.n_cols + col];
+    }
+    return result_matrix;
+}
+
 void set_to_one_less_than_epsilon(double_dense_matrix matrix) {
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
         for (j = 0; j < matrix.n_cols; j++) {
-            if (matrix.matrix[i * matrix.n_cols + j] < DBL_EPSILON) {
+            if (matrix.matrix[i * matrix.n_cols + j] < FLT_EPSILON) {
                 matrix.matrix[i * matrix.n_cols + j] = 1.0;
             }
             // matrix.matrix[i * matrix.n_cols + j] = (matrix.matrix[i * matrix.n_cols + j] < DBL_EPSILON) * 1.0 + (matrix.matrix[i * matrix.n_cols + j] > DBL_EPSILON) * matrix.matrix[i * matrix.n_cols + j];
