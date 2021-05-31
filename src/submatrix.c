@@ -6,6 +6,7 @@
 #include "submatrix.h"
 #include "matrix_partition.h"
 #include <assert.h>
+#include "log.h"
 
 submatrix create_empty_submatrix(int* infos);
 
@@ -143,7 +144,7 @@ submatrix wait_for_sparse_matrix(){
 }
 
 
-double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix) {
+double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix) {
     double_dense_matrix result_matrix = create_double_dense_matrix(1, submatrix.stop_col - submatrix.start_col);
     int i;
     for (i = 0; i < submatrix.stop_col - submatrix.start_col; i++) {
@@ -155,7 +156,7 @@ double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix) {
     return result_matrix;
 }
 
-double_dense_matrix sum_submatrix_along_cols(const submatrix submatrix) {
+double_dense_matrix sum_submatrix_along_rows(const submatrix submatrix) {
     double_dense_matrix result_matrix = create_double_dense_matrix(submatrix.stop_row - submatrix.start_row, 1);
     int i;
     for (i = 0; i < submatrix.stop_row - submatrix.start_row; i++) {
@@ -250,9 +251,9 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
 
 
 void util_print_submatrix(const submatrix submatrix){
-    printf("n_elements=%d   starts=[%d,%d] stop=[%d,%d]\n", submatrix.n_elements, submatrix.start_row, submatrix.start_col, submatrix.stop_row, submatrix.stop_col);
+    log_trace("n_elements=%d   starts=[%d,%d] stop=[%d,%d]\n", submatrix.n_elements, submatrix.start_row, submatrix.start_col, submatrix.stop_row, submatrix.stop_col);
     for (int i=0; i<submatrix.n_elements; i++){
-        printf("- (%d,%d): %lf\n", submatrix.elements[i].row, submatrix.elements[i].col, submatrix.elements[i].val);
+        log_trace("- (%d,%d): %lf\n", submatrix.elements[i].row, submatrix.elements[i].col, submatrix.elements[i].val);
     }
-    printf("\n");
+    log_trace("\n");
 }

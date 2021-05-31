@@ -116,28 +116,31 @@ int main(int argc, char** argv) {
         if (world_rank == 0) {
             // get the column, apply the same permutation as before, broadcast
             double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);
+            log_trace("%d poi_marginals_at_hour_not_perm:\n", world_rank);
+            print_dense_matrix(poi_marginals_at_hour_not_perm);///////////////////////////////////////////////////////////////////
             double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);
+            log_trace("%d cbg_marginals_at_hour_not_perm:\n", world_rank);
+            print_dense_matrix(cbg_marginals_at_hour_not_perm);///////////////////////////////////////////////////////////////////
             double_dense_matrix cbg_marginals_at_hour = permutate_double_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm);
             double_dense_matrix poi_marginals_at_hour = permutate_double_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
             // clean_double_dense_matrix(&poi_marginals_at_hour_not_perm); ////////////////////////////////////////////////////////////////////////////////////////////////
             // clean_double_dense_matrix(&cbg_marginals_at_hour_not_perm); ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, poi_marginals_at_hour_not_perm, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
+            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, poi_marginals_at_hour_not_perm, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
             clean_double_dense_matrix(&poi_marginals_at_hour);
-            row_process_list = distribute_row_processes_list(partition, world_rank, MPI_COMM_WORLD);
-            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, cbg_marginals_at_hour_not_perm, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
-            clean_double_dense_matrix(&cbg_marginals_at_hour);
             col_process_list = distribute_col_processes_list(partition, world_rank, MPI_COMM_WORLD);
+            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, cbg_marginals_at_hour_not_perm, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
+            clean_double_dense_matrix(&cbg_marginals_at_hour);
+            row_process_list = distribute_row_processes_list(partition, world_rank, MPI_COMM_WORLD);
         } else {
             // receive broadcast
-            if (row_responsible(submatrix_to_elaborate, world_rank)) {
-                poi_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
-                row_process_list = receive_process_list(0, MPI_COMM_WORLD);
-                
-            }
             if (col_responsible(submatrix_to_elaborate, world_rank)) {
-                cbg_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
+                poi_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
                 col_process_list = receive_process_list(0, MPI_COMM_WORLD);
+            }
+            if (row_responsible(submatrix_to_elaborate, world_rank)) {
+                cbg_marginals_at_hour_responsible = receive_double_dense_matrix(0, MPI_COMM_WORLD);
+                row_process_list = receive_process_list(0, MPI_COMM_WORLD);
             }
         }
         // create a copy of the submatrix (one copy for each hour) 
@@ -146,18 +149,18 @@ int main(int argc, char** argv) {
         int e = 0;
 
         for (int i = 1; i < NUM_ITERATIONS; i++) {
-            log_trace("[%d] init iteration %lf\n",world_rank,working_submatrix.elements[0].val); ///////////////////////////////////////////////////////////////////
+            log_trace("[%d] ITERATION %d\n",world_rank, i); ///////////////////////////////////////////////////////////////////
             util_print_submatrix(working_submatrix);////////////////////////////////////////////////////////////////////
 
             if (i % 2 == 1) {
                 // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
-                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix); // TODO: replace rows with cols without changing implementation
+                double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix); // TODO: replace rows with cols without changing implementation
                 log_trace("%d Sum result:\n", world_rank);
                 print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
                 double_dense_matrix alfa_i;
                 
-                if (col_responsible(working_submatrix, world_rank)) {
-                    log_trace("%d col_process_list.num_subprocesses %d\n", world_rank, col_process_list.num_subprocesses);
+                if (row_responsible(working_submatrix, world_rank)) {
+                    log_trace("%d col_process_list.num_subprocesses %d\n", world_rank, row_process_list.num_subprocesses);
                     log_trace("%d Aggregate sum result (before):\n", world_rank);
                     print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
                     aggregate_sum_results(sum_result, col_process_list, MPI_COMM_WORLD);
@@ -183,28 +186,47 @@ int main(int argc, char** argv) {
                 if (world_rank==0) log_trace("[0] before multipl by alpha %lf\n",working_submatrix.elements[0].val); ///////////////////////////////////////////////////////////////////
                 clean_double_dense_matrix(&sum_result);
                 // new_w = sparse_dense_vector_mul(last_w, alfa_i)
-                log_trace("alfa_i   values...\n");
+                log_trace("alfa_i after distribution:\n");
                 print_dense_matrix(alfa_i);///////////////////////////////////////////////////////////////////
                 multiply_coefficient_by_cols(alfa_i, working_submatrix);
+                printf("Multiply coefficient by cols:");
+                util_print_submatrix(working_submatrix);////////////////////////////////////////////////////////////////////
                 clean_double_dense_matrix(&alfa_i);
             } else {
                 // last_w_axis_sum = torch.sparse.sum(last_w, dim=1).to_dense()
-                double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix); // TODO: replace cols with rows without changing implementation
+                double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix); // TODO: replace cols with rows without changing implementation
+                log_trace("%d Sum result:\n", world_rank);
+                print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
                 double_dense_matrix alfa_i;
-                if (row_responsible(working_submatrix, world_rank)) {
+                if (col_responsible(working_submatrix, world_rank)) {
+                    log_trace("%d row_process_list.num_subprocesses %d\n", world_rank, row_process_list.num_subprocesses);
+                    log_trace("%d Aggregate sum result (before):\n", world_rank);
+                    print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
                     aggregate_sum_results(sum_result, row_process_list, MPI_COMM_WORLD);
+                    log_trace("%d Aggregate sum result:\n", world_rank);
+                    print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(sum_result);
+                    log_trace("%d Set one less than epsilon:\n", world_rank);
+                    print_dense_matrix(sum_result);///////////////////////////////////////////////////////////////////
+                    log_trace("%d POI marginal at hour responsible:\n", world_rank);
+                    print_dense_matrix(poi_marginals_at_hour_responsible);///////////////////////////////////////////////////////////////////
                     // alfa_i = cbg_marginals_u / last_w_axis_sum
                     alfa_i = elementwise_division(poi_marginals_at_hour_responsible, sum_result);
+                    log_trace("%d Elementwise division:\n", world_rank);
+                    print_dense_matrix(alfa_i);///////////////////////////////////////////////////////////////////
                     distribute_dense_matrix_to_processes(alfa_i, row_process_list, MPI_COMM_WORLD);
                 } else {
                     send_sum_results(sum_result, working_submatrix.row_responsible, MPI_COMM_WORLD);
                     alfa_i = receive_double_dense_matrix(working_submatrix.row_responsible, MPI_COMM_WORLD);
                 }
                 clean_double_dense_matrix(&sum_result);
+                log_trace("alfa_i after distribution:\n");
+                print_dense_matrix(alfa_i);///////////////////////////////////////////////////////////////////
                 // new_w = sparse_dense_vector_mul(last_w, alfa_i)
                 multiply_coefficient_by_rows(alfa_i, working_submatrix);
+                printf("Multiply coefficient by rows:");
+                util_print_submatrix(working_submatrix);////////////////////////////////////////////////////////////////////
                 clean_double_dense_matrix(&alfa_i);
             }
         }

@@ -38,6 +38,20 @@ double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col)
     return result_matrix;
 }
 
+double_dense_matrix get_row_as_dense(const double_sparse_matrix matrix, int row) {
+    double_dense_matrix result_matrix = create_double_dense_matrix(1, matrix.n_cols);
+    int i;
+    for (int i = 0; i < matrix.n_cols; i++) {
+        result_matrix.matrix[i] = 0.0;
+    }
+    for (i = 0; i < matrix.n_elements; i++) {
+        if (matrix.rows[i] == row) {
+            result_matrix.matrix[matrix.cols[i]] += matrix.values[i];
+        }
+    }
+    return result_matrix;
+}
+
 double_sparse_matrix load_double_sparse_matrix(const char *filename)
 {
     int n_rows, n_cols, n_elements, i;
