@@ -21,8 +21,9 @@ bool check_number_of_processes(int* world_size, int* world_rank){
     if (world_size[0]<5) return false;
     int half = (*world_size) / 2;
 
+    int i;
     // if is not a prime number return 0
-    for (int i=2; i<half; i++)
+    for (i=2; i<half; i++)
         if (world_size[0]%i == 0) return false;
     
     // else decrease world size
