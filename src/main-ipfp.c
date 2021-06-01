@@ -98,8 +98,9 @@ int main(int argc, char** argv) {
 
     float average_per_hour = 0.0;
     float average_saving_operations = 0.0;
+    int hour_idx;
     // for every hour compute IPFP
-    for (int i = 0; i < hours; i++) {
+    for (hour_idx = 0; hour_idx < hours; hour_idx++) {
         float start_time_hour = MPI_Wtime();
         // vectors that will be used in IPFP (marginal sums of rows/cols)
         
@@ -110,8 +111,8 @@ int main(int argc, char** argv) {
 
         if (world_rank == 0) {
             // get the column, apply the same permutation as before, broadcast
-            double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, i);
-            double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, i);
+            double_dense_matrix poi_marginals_at_hour_not_perm = get_col_as_dense(poi_marginals_matrix, hour_idx);
+            double_dense_matrix cbg_marginals_at_hour_not_perm = get_row_from_dense(cbg_marginals_matrix, hour_idx);
             double_dense_matrix cbg_marginals_at_hour = permutate_double_dense_matrix_along_rows(permutation, cbg_marginals_at_hour_not_perm);
             double_dense_matrix poi_marginals_at_hour = permutate_double_dense_matrix_along_columns(permutation, poi_marginals_at_hour_not_perm);
             clean_double_dense_matrix(&poi_marginals_at_hour_not_perm);
@@ -139,8 +140,9 @@ int main(int argc, char** argv) {
 
         int e = 0;
 
-        for (int i = 1; i < NUM_ITERATIONS; i++) {
-            if (i % 2 == 1) {
+        int idx_iterations;
+        for (idx_iterations = 1; idx_iterations < NUM_ITERATIONS; idx_iterations++) {
+            if (idx_iterations % 2 == 1) {
                 // last_w_axis_sum = sparse.sum(last_w, dim=0).to_dense()
                 double_dense_matrix sum_result = sum_submatrix_along_cols(working_submatrix); // TODO: replace rows with cols without changing implementation
                 double_dense_matrix alfa_i;
@@ -199,7 +201,7 @@ int main(int argc, char** argv) {
             
             float t_saving_operation_start_time = MPI_Wtime();
             char str[512];
-            sprintf(str, "%s/save_result_%d.txt", argv[4], i);
+            sprintf(str, "%s/save_result_%d.txt", argv[4], hour_idx);
             save_double_sparse_matrix(str, corrected_matrix);
             float saving_operations_time = MPI_Wtime() - t_saving_operation_start_time;
             printf("Saving time: %f\n", saving_operations_time);

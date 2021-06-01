@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <float.h>
 
-
 /**
  * This function return a new dense matrix with the given size
  **/ 
