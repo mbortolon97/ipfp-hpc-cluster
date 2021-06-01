@@ -14,7 +14,7 @@ double_dense_matrix distribute_double_dense_matrix_using_column_partition(const 
     dimension[1] = matrix.n_cols;
     
     int i;
-    for (int i = 0; i < partition.subp_rows; i++) {
+    for (i = 0; i < partition.subp_rows; i++) {
         dimension[0] = partition.row_master[i].stop_row - partition.row_master[i].start_row;
         if (partition.row_master[i].row_master_process_id != world_rank) {
             MPI_Send(&dimension, 2, MPI_INT, partition.row_master[i].row_master_process_id, SEND_DENSE_MATRIX_DIMENSION, comm);
@@ -35,7 +35,7 @@ double_dense_matrix distribute_double_dense_matrix_using_row_partition(const sub
     dimension[0] = matrix.n_rows;
 
     int i;
-    for (int i = 0; i < partition.subp_cols; i++) {
+    for (i = 0; i < partition.subp_cols; i++) {
         dimension[1] = partition.col_master[i].stop_col - partition.col_master[i].start_col;
         if (partition.col_master[i].col_master_process_id != world_rank) {
             MPI_Send(&dimension, 2, MPI_INT, partition.col_master[i].col_master_process_id, SEND_DENSE_MATRIX_DIMENSION, comm);
