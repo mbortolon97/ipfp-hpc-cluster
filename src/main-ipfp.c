@@ -117,10 +117,10 @@ int main(int argc, char** argv) {
             clean_double_dense_matrix(&poi_marginals_at_hour_not_perm);
             clean_double_dense_matrix(&cbg_marginals_at_hour_not_perm);
 
-            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, poi_marginals_at_hour, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
+            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, poi_marginals_at_hour, world_rank, MPI_COMM_WORLD);
             clean_double_dense_matrix(&poi_marginals_at_hour);
             col_process_list = distribute_col_processes_list(partition, world_rank, MPI_COMM_WORLD);
-            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, cbg_marginals_at_hour, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
+            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, cbg_marginals_at_hour, world_rank, MPI_COMM_WORLD);
             clean_double_dense_matrix(&cbg_marginals_at_hour);
             row_process_list = distribute_row_processes_list(partition, world_rank, MPI_COMM_WORLD);
         } else {

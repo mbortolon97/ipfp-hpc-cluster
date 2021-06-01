@@ -45,18 +45,28 @@ typedef struct submatrix_partition_struct {
     int* cols_responsible;
 } submatrix_partition;
 
+
+/**
+ * This function returns a submatrix partition, which is an assignment of what submatrix will be handled by each process 
+ **/ 
 submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int n_cols);
 
+/**
+ * This function frees the memory allocated for a partition
+ **/ 
 void clean_submatrix_partition(submatrix_partition* partition);
 
+/**
+ * This function says if and element in (row,col) is inside the assignment os a process
+ **/ 
 static inline bool check_if_inside_submatrix(submatrix_assignment assignment, int row, int col) {
     return row >= assignment.start_row && row < assignment.stop_row && col >= assignment.start_col && col < assignment.stop_col;
 }
 
 /**
- * check if the number of processes is a prime number > 3
+ * This function checks if the number of processes is a prime number > 3
  * if it is, kills the last process (which won't be used)
- */
+ **/
 bool check_number_of_processes(int* world_size, int* world_rank);
 
 #endif
