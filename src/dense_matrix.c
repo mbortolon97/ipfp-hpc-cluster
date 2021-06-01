@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <float.h>
 
-#include "log.h"
-
 /**
  * This function return a new dense matrix with the given size
  **/ 
