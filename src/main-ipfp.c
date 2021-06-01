@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
     float average_saving_operations = 0.0;
     int hour_idx;
     // for every hour compute IPFP
-    for (int hour_idx = 0; hour_idx < hours; hour_idx++) {
+    for (hour_idx = 0; hour_idx < hours; hour_idx++) {
         float start_time_hour = MPI_Wtime();
         // vectors that will be used in IPFP (marginal sums of rows/cols)
         
