@@ -86,6 +86,7 @@ int main(int argc, char** argv) {
         printf("distribution_operations_time: %f\n", distribution_operations_time);
         
         clean_sparse_matrix(&aggregate_visit_matrix);
+        clean_sparse_matrix(&permutated_aggregate_visit_matrix);
         hours = poi_marginals_matrix.n_cols;
     } else {
         // receive submatrix from process_0
@@ -116,10 +117,10 @@ int main(int argc, char** argv) {
             clean_double_dense_matrix(&poi_marginals_at_hour_not_perm);
             clean_double_dense_matrix(&cbg_marginals_at_hour_not_perm);
 
-            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, poi_marginals_at_hour, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
+            poi_marginals_at_hour_responsible = distribute_double_dense_matrix_using_column_partition(partition, poi_marginals_at_hour, world_rank, MPI_COMM_WORLD);
             clean_double_dense_matrix(&poi_marginals_at_hour);
             col_process_list = distribute_col_processes_list(partition, world_rank, MPI_COMM_WORLD);
-            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, cbg_marginals_at_hour, world_rank, MPI_COMM_WORLD); // TODO: replace with permutated
+            cbg_marginals_at_hour_responsible = distribute_double_dense_matrix_using_row_partition(partition, cbg_marginals_at_hour, world_rank, MPI_COMM_WORLD);
             clean_double_dense_matrix(&cbg_marginals_at_hour);
             row_process_list = distribute_row_processes_list(partition, world_rank, MPI_COMM_WORLD);
         } else {
@@ -183,9 +184,11 @@ int main(int argc, char** argv) {
 
         if (row_responsible(submatrix_to_elaborate, world_rank)) {
             clean_double_dense_matrix(&poi_marginals_at_hour_responsible);
+            clean_process_list(&row_process_list);
         }
         if (col_responsible(submatrix_to_elaborate, world_rank)) {
             clean_double_dense_matrix(&cbg_marginals_at_hour_responsible);
+            clean_process_list(&col_process_list);
         }
 
         if (world_rank == 0) {
@@ -227,6 +230,7 @@ int main(int argc, char** argv) {
         clean_sparse_matrix(&poi_marginals_matrix);
         clean_double_dense_matrix(&cbg_marginals_matrix);
     }
+    clean_submatrix(&submatrix_to_elaborate);
 	
     MPI_Finalize();
     return 0;
