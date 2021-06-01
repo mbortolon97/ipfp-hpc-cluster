@@ -3,10 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <assert.h>
 #include "submatrix.h"
 #include "matrix_partition.h"
-#include <assert.h>
-#include "log.h"
 
 submatrix create_empty_submatrix(int* infos);
 

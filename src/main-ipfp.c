@@ -86,6 +86,7 @@ int main(int argc, char** argv) {
         printf("distribution_operations_time: %f\n", distribution_operations_time);
         
         clean_sparse_matrix(&aggregate_visit_matrix);
+        clean_sparse_matrix(&permutated_aggregate_visit_matrix);
         hours = poi_marginals_matrix.n_cols;
     } else {
         // receive submatrix from process_0
@@ -183,9 +184,11 @@ int main(int argc, char** argv) {
 
         if (row_responsible(submatrix_to_elaborate, world_rank)) {
             clean_double_dense_matrix(&poi_marginals_at_hour_responsible);
+            clean_process_list(&row_process_list);
         }
         if (col_responsible(submatrix_to_elaborate, world_rank)) {
             clean_double_dense_matrix(&cbg_marginals_at_hour_responsible);
+            clean_process_list(&col_process_list);
         }
 
         if (world_rank == 0) {
@@ -227,6 +230,7 @@ int main(int argc, char** argv) {
         clean_sparse_matrix(&poi_marginals_matrix);
         clean_double_dense_matrix(&cbg_marginals_matrix);
     }
+    clean_submatrix(&submatrix_to_elaborate);
 	
     MPI_Finalize();
     return 0;
