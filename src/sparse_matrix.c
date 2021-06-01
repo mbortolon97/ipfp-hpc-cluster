@@ -27,7 +27,7 @@ void clean_sparse_matrix(double_sparse_matrix* matrix) {
 double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col) {
     double_dense_matrix result_matrix = create_double_dense_matrix(matrix.n_rows, 1);
     int i;
-    for (int i = 0; i < matrix.n_rows; i++) {
+    for (i = 0; i < matrix.n_rows; i++) {
         result_matrix.matrix[i] = 0.0;
     }
     for (i = 0; i < matrix.n_elements; i++) {
@@ -41,7 +41,7 @@ double_dense_matrix get_col_as_dense(const double_sparse_matrix matrix, int col)
 double_dense_matrix get_row_as_dense(const double_sparse_matrix matrix, int row) {
     double_dense_matrix result_matrix = create_double_dense_matrix(1, matrix.n_cols);
     int i;
-    for (int i = 0; i < matrix.n_cols; i++) {
+    for (i = 0; i < matrix.n_cols; i++) {
         result_matrix.matrix[i] = 0.0;
     }
     for (i = 0; i < matrix.n_elements; i++) {
@@ -101,8 +101,9 @@ void save_double_sparse_matrix(const char *filename, double_sparse_matrix matrix
     // write the first line
     fprintf(out_file, "%d %d %d\n", matrix.n_rows, matrix.n_cols, matrix.n_elements);
 
+    int i;
     // write elements
-    for (int i = 0; i < matrix.n_elements; i++)
+    for (i = 0; i < matrix.n_elements; i++)
     {
         fprintf(out_file, "%d %d %e\n", matrix.rows[i], matrix.cols[i], matrix.values[i]);
     }
