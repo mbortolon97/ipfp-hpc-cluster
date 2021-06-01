@@ -1,9 +1,18 @@
-# ipfp-hpc-cluster
-This repository contain a implementation of the IPFP that work on large HPC cluster
+# [HPC Project] High performance IPFP
 
-# Compile from source
+This repository contain an implementation of the **Iterative Proportional Fitting Procedure** (IPFP) which can be run on large HPC cluster.
+This implementation is thought to speed-up the the IPFP step used by [Albani et al.](https://www.nature.com/articles/s41598-021-88281-w#citeas), where they use this algorithm to forecast how many people will frequent a **point of interest** (eg. restaurants, shops, ...) in a given hour of the day.
+
+### Useful Links
+
+- ...
+
+### How to run the code
+
+_needs testing_
 
 To compile from source execute:
+
 ```
 cd ipfp-hpc-cluster
 mkdir build
