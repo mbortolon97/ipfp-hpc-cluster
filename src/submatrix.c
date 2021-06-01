@@ -93,7 +93,7 @@ submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse
             free(mpi_data);
         }
     }    
-
+    MPI_Type_free(mpi_tuple);
     return process_0_submatrix;
 }
 
@@ -139,6 +139,7 @@ submatrix wait_for_sparse_matrix(){
         my_submatrix.elements[i].row -= my_submatrix.start_row;
         my_submatrix.elements[i].col -= my_submatrix.start_col;
     }
+    MPI_Type_free(mpi_tuple);
     return my_submatrix;
 }
 
@@ -202,6 +203,7 @@ void send_submatrices(submatrix working_submatrix){
         working_submatrix.elements[i].col += working_submatrix.start_col;
     }
     MPI_Send( working_submatrix.elements , working_submatrix.n_elements+1 , mpi_tuple , 0 , 0 , MPI_COMM_WORLD);
+    MPI_Type_free(mpi_tuple);
 }
 
 double_sparse_matrix group_submatrices(submatrix working_submatrix, double_sparse_matrix* original_matrix, const int n_processes, const int n_elements_biggest_sumbatrix){
@@ -235,6 +237,7 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
         // add element to results;
     }
     free(buffer);
+    MPI_Type_free(mpi_tuple);
     return results;
 }
 
