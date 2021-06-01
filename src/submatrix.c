@@ -43,9 +43,10 @@ submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse
     // set counters to 0
     memset( elements_assigned_to_process_counter, 0, n_processes*sizeof(int) );
 
-    for (int i=0; i<matrix.n_elements; i++){
+    int i, p;
+    for (i=0; i<matrix.n_elements; i++){
         int found = 0;
-        for (int p=0; p<n_processes && !found; p++){
+        for (p=0; p<n_processes && !found; p++){
             // if process P must handle element I
             if (check_if_inside_submatrix(partition->assignments[p], matrix.rows[i], matrix.cols[i])){
                 found=1;
@@ -59,7 +60,7 @@ submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse
     build_mpi_tuple(&mpi_tuple);
 
     // send infos to other processes
-    for (int p=0; p<n_processes; p++){
+    for (p=0; p<n_processes; p++){
         if (partition->n_elements_biggest_partition < elements_assigned_to_process_counter[p])
             partition->n_elements_biggest_partition = elements_assigned_to_process_counter[p];
         
@@ -76,7 +77,7 @@ submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse
         // create a countiguous block of memory to send the data
         struct mpi_matrix_element* mpi_data = malloc(sizeof(struct mpi_matrix_element)*elements_assigned_to_process_counter[p]);
         int count = 0;
-        for (int i=0; i<matrix.n_elements; i++){
+        for (i=0; i<matrix.n_elements; i++){
             if (check_if_inside_submatrix(partition->assignments[p], matrix.rows[i], matrix.cols[i])){
                 mpi_data[count].row = matrix.rows[i];
                 mpi_data[count].col = matrix.cols[i];
@@ -212,17 +213,19 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
     MPI_Datatype mpi_tuple;
     build_mpi_tuple(&mpi_tuple);
 
+    int j;
     // add the results of the local working_submatrix
-    for (int j=0; j<working_submatrix.n_elements; j++){
+    for (j=0; j<working_submatrix.n_elements; j++){
         results.rows[index] = working_submatrix.elements[j].row;
         results.cols[index] = working_submatrix.elements[j].col;
         results.values[index] = working_submatrix.elements[j].val;
         index++;
     }
 
+    int i;
     // receive results from the other processes
-    for (int i = 1; i< n_processes; i++){
-        int j = 0;
+    for (i = 1; i< n_processes; i++){
+        j = 0;
         MPI_Recv( buffer , n_elements_biggest_sumbatrix+1 , mpi_tuple , i , 0 , MPI_COMM_WORLD , &status);
 
         while (buffer[j].row!=-1){
@@ -241,7 +244,8 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
 
 void util_print_submatrix(const submatrix submatrix){
     printf("n_elements=%d   starts=[%d,%d] stop=[%d,%d]\n", submatrix.n_elements, submatrix.start_row, submatrix.start_col, submatrix.stop_row, submatrix.stop_col);
-    for (int i=0; i<submatrix.n_elements; i++){
+    int i;
+    for (i=0; i<submatrix.n_elements; i++){
         printf("- (%d,%d): %lf\n", submatrix.elements[i].row, submatrix.elements[i].col, submatrix.elements[i].val);
     }
     printf("\n");
