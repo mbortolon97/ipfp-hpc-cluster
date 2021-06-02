@@ -97,7 +97,6 @@ int main(int argc, char** argv) {
     
 
     MPI_Bcast(&hours, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    hours = 1;
 
     float average_per_hour = 0.0;
     float average_saving_operations = 0.0;

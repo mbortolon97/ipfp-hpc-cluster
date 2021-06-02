@@ -86,7 +86,13 @@ submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse
             }
         }
         if (p==0){
-            process_0_submatrix = create_empty_submatrix(infos); //// TO BE DONE
+            process_0_submatrix.start_row = infos[0];
+            process_0_submatrix.stop_row = infos[1];
+            process_0_submatrix.start_col = infos[2];
+            process_0_submatrix.stop_col = infos[3];
+            process_0_submatrix.n_elements = infos[4];
+            process_0_submatrix.col_responsible = infos[5];
+            process_0_submatrix.row_responsible = infos[6];
             process_0_submatrix.elements = mpi_data;
         }else{
             MPI_Send( infos , 7 , MPI_INT , p , 0 , MPI_COMM_WORLD);
