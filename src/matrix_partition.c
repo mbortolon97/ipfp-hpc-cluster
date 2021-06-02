@@ -190,6 +190,7 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
 void print_submatrix(const submatrix_partition partition) {
     printf("partition.subp_rows %d\n", partition.subp_rows);
     printf("partition.subp_cols %d\n", partition.subp_cols);
+    int i;
     for (i = 0; i < partition.subp_rows; i++) {
         printf("row: %d partition.row_master[i].start_row %d\n", i, partition.row_master[i].start_row);
         printf("row: %d partition.row_master[i].stop_row %d\n", i, partition.row_master[i].stop_row);
