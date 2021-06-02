@@ -190,28 +190,28 @@ submatrix_partition create_submatrix_partition(int n_processes, int n_rows, int 
 void print_submatrix(const submatrix_partition partition) {
     printf("partition.subp_rows %d\n", partition.subp_rows);
     printf("partition.subp_cols %d\n", partition.subp_cols);
-    int i;
+    int i, j;
     for (i = 0; i < partition.subp_rows; i++) {
         printf("row: %d partition.row_master[i].start_row %d\n", i, partition.row_master[i].start_row);
         printf("row: %d partition.row_master[i].stop_row %d\n", i, partition.row_master[i].stop_row);
         printf("row: %d partition.row_master[i].num_subprocesses %d\n", i, partition.row_master[i].num_subprocesses);
         printf("row: %d [", i);
-        for (int i = 0; i < partition.row_master[i].num_subprocesses; i++) {
-            printf("%d, ", partition.row_master[i].row_processes_id[i]);
+        for (j = 0; j < partition.row_master[i].num_subprocesses; j++) {
+            printf("%d, ", partition.row_master[i].row_processes_id[j]);
         }
         printf("]\n");
         printf("row: %d partition.row_master[i].row_master_process_id %d\n", i, partition.row_master[i].row_master_process_id);
     }
     for (i = 0; i < partition.subp_cols; i++) {
-        printf("row: %d partition.col_master[i].start_col %d\n", i, partition.col_master[i].start_col);
-        printf("row: %d partition.col_master[i].stop_col %d\n", i, partition.col_master[i].stop_col);
-        printf("row: %d partition.col_master[i].num_subprocesses %d\n", i, partition.col_master[i].num_subprocesses);
-        printf("row: %d [", i);
-        for (int i = 0; i < partition.col_master[i].num_subprocesses; i++) {
-            printf("%d, ", partition.col_master[i].col_processes_id[i]);
+        printf("col: %d partition.col_master[i].start_col %d\n", i, partition.col_master[i].start_col);
+        printf("col: %d partition.col_master[i].stop_col %d\n", i, partition.col_master[i].stop_col);
+        printf("col: %d partition.col_master[i].num_subprocesses %d\n", i, partition.col_master[i].num_subprocesses);
+        printf("col: %d [", i);
+        for (j = 0; j < partition.col_master[i].num_subprocesses; j++) {
+            printf("%d, ", partition.col_master[i].col_processes_id[j]);
         }
         printf("]\n");
-        printf("row: %d partition.col_master[i].col_master_process_id %d\n", i, partition.col_master[i].col_master_process_id);
+        printf("col: %d partition.col_master[i].col_master_process_id %d\n", i, partition.col_master[i].col_master_process_id);
     }
 }
 

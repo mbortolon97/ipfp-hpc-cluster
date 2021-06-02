@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
         float permutation_time = MPI_Wtime() - t_start_permutation_operations;
         printf("permutation_time: %f\n", permutation_time);
 
-        print_submatrix(partition);
+        // print_submatrix(partition);
 
         float t_start_distribution_operations = MPI_Wtime();
         // send submatrices to other processes
