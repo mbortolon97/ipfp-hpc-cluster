@@ -69,4 +69,9 @@ static inline bool check_if_inside_submatrix(submatrix_assignment assignment, in
  **/
 bool check_number_of_processes(int* world_size, int* world_rank);
 
+/**
+ * This function print the submatrix partition
+ **/
+void print_submatrix(const submatrix_partition partition);
+
 #endif

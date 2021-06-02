@@ -78,6 +78,8 @@ int main(int argc, char** argv) {
         float permutation_time = MPI_Wtime() - t_start_permutation_operations;
         printf("permutation_time: %f\n", permutation_time);
 
+        print_submatrix(partition);
+
         float t_start_distribution_operations = MPI_Wtime();
         // send submatrices to other processes
         submatrix_to_elaborate = distribute_sparse_matrix(&partition, permutated_aggregate_visit_matrix); // TODO: replace with the permutated
@@ -95,6 +97,7 @@ int main(int argc, char** argv) {
     
 
     MPI_Bcast(&hours, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    hours = 1;
 
     float average_per_hour = 0.0;
     float average_saving_operations = 0.0;
@@ -226,13 +229,15 @@ int main(int argc, char** argv) {
         printf("Average saving time per hour: %f\n", average_saving_operations / hours);
     }
     
+    clean_submatrix(&submatrix_to_elaborate);
     if(world_rank == 0) {
+        clean_submatrix_partition(&partition);
         clean_sparse_matrix_permutation(&permutation);
         clean_sparse_matrix(&aggregate_visit_matrix);
         clean_sparse_matrix(&poi_marginals_matrix);
         clean_double_dense_matrix(&cbg_marginals_matrix);
     }
-    clean_submatrix(&submatrix_to_elaborate);
+    
 	
     MPI_Finalize();
     return 0;
