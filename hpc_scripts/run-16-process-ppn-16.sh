@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -l nodes=1:ppn=16:pmem=1gb
+#PBS -l select=1:ncpus=16:pmem=1gb
 
 #PBS -l walltime=0:35:00
 
