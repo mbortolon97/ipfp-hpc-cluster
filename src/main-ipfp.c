@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 
     int hours;
 
-    
+    float io_time, permutation_time, distribution_operations_time;
     if (world_rank == 0) {
         float t_start_io_operation = MPI_Wtime();
         // load matrices from files
@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
         poi_marginals_matrix = load_double_sparse_matrix(argv[2]);
         cbg_marginals_matrix = load_double_dense_matrix(argv[3]);
 
-        float io_time = MPI_Wtime() - t_start_io_operation;
+        io_time = MPI_Wtime() - t_start_io_operation;
         printf("io_time: %f\n", io_time);
 
         float t_start_permutation_operations = MPI_Wtime();
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
         permutation = create_sparse_matrix_random_permutation(aggregate_visit_matrix);
         permutated_aggregate_visit_matrix = permutate_double_sparse_matrix(permutation, aggregate_visit_matrix);
         partition = create_submatrix_partition(world_size, permutated_aggregate_visit_matrix.n_rows, permutated_aggregate_visit_matrix.n_cols);
-        float permutation_time = MPI_Wtime() - t_start_permutation_operations;
+        permutation_time = MPI_Wtime() - t_start_permutation_operations;
         printf("permutation_time: %f\n", permutation_time);
 
         // print_submatrix(partition);
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
         // send submatrices to other processes
         submatrix_to_elaborate = distribute_sparse_matrix(&partition, permutated_aggregate_visit_matrix); // TODO: replace with the permutated
 
-        float distribution_operations_time = MPI_Wtime() - t_start_distribution_operations;
+        distribution_operations_time = MPI_Wtime() - t_start_distribution_operations;
         printf("distribution_operations_time: %f\n", distribution_operations_time);
         
         clean_sparse_matrix(&aggregate_visit_matrix);
@@ -236,6 +236,7 @@ int main(int argc, char** argv) {
         clean_sparse_matrix(&poi_marginals_matrix);
         clean_double_dense_matrix(&cbg_marginals_matrix);
     }
+    
     
 	
     MPI_Finalize();
