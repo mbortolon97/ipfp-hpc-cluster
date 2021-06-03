@@ -1,9 +1,11 @@
 import os
+import pandas as pd
 
 id = []
 number_of_processes = []
 process_per_node = []
 
+data = []
 for basename in os.path.listdir("/home/matteo/uniTN/hpc/results"):
     file_path = os.path.join("/home/matteo/uniTN/hpc/results", basename)
     root_ext = os.path.splitext(basename)
@@ -34,4 +36,10 @@ for basename in os.path.listdir("/home/matteo/uniTN/hpc/results"):
             
     if len(fields) != 8:
         print("Invalid file: ", file_path)
+        continue
+
+    data.append(fields)
+
+df = pd.DataFrame(data)
+df.to_csv("result-summary.csv")
 
