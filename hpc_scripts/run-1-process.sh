@@ -2,7 +2,7 @@
 
 #PBS -l select=1:ncpus=1,pmem=2gb
 
-#PBS -l walltime=0:35:00
+#PBS -l walltime=0:45:00
 
 #PBS -q short_cpuQ
 
