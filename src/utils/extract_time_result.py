@@ -6,14 +6,14 @@ number_of_processes = []
 process_per_node = []
 
 data = []
-for basename in os.path.listdir("/home/matteo/uniTN/hpc/results"):
+for basename in os.listdir("/home/matteo/uniTN/hpc/results"):
     file_path = os.path.join("/home/matteo/uniTN/hpc/results", basename)
     root_ext = os.path.splitext(basename)
-    if not root_ext[-1].startswith("o"):
+    if not root_ext[-1].startswith(".o"):
         continue
-    fields = {'id': root_ext[-1][1:]}
+    fields = {'id': root_ext[-1][2:]}
     with open(file_path) as f:
-        line = f.readline()
+        line = "Hello"
         while line:
             line = f.readline()
             
@@ -33,7 +33,7 @@ for basename in os.path.listdir("/home/matteo/uniTN/hpc/results"):
                 fields['permutation_time'] = line[len("permutation_time: "):]
             if line.startswith("distribution_operations_time: "):
                 fields['distribution_operations_time'] = line[len("distribution_operations_time: "):]
-            
+    
     if len(fields) != 8:
         print("Invalid file: ", file_path)
         continue
