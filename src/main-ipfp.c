@@ -34,7 +34,10 @@ int main(int argc, char** argv) {
 	int world_size, world_rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    
+    if (world_rank == 0) {
+        double tick = MPI_Wtick();
+        printf("Hardware clock tick: %e\n", tick);
+    }
     if(check_number_of_processes(&world_size, &world_rank)){
         MPI_Finalize();
         return 0; // the last process terminates if it won't be used
@@ -100,6 +103,7 @@ int main(int argc, char** argv) {
 
     double average_per_hour = 0.0;
     double average_saving_operations = 0.0;
+    double average_distribution_aggregation_time = 0.0;
     int hour_idx;
     // for every hour compute IPFP
     for (hour_idx = 0; hour_idx < hours; hour_idx++) {
@@ -150,12 +154,16 @@ int main(int argc, char** argv) {
                 double_dense_matrix alfa_i;
                 
                 if (col_responsible(working_submatrix, world_rank)) {
+                    double aggregation_start_time = MPI_Wtime();
                     aggregate_sum_results(sum_result, col_process_list, MPI_COMM_WORLD);
+                    average_distribution_aggregation_time += MPI_Wtime() - aggregation_start_time;
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(sum_result);
                     // alfa_i = cbg_marginals_u / last_w_axis_sum
                     alfa_i = elementwise_division(cbg_marginals_at_hour_responsible, sum_result);
+                    double distribution_start_time = MPI_Wtime();
                     distribute_dense_matrix_to_processes(alfa_i, col_process_list, MPI_COMM_WORLD);
+                    average_distribution_aggregation_time += MPI_Wtime() - distribution_start_time;
                 } else {
                     send_sum_results(sum_result, working_submatrix.col_responsible, MPI_COMM_WORLD);
                     alfa_i = receive_double_dense_matrix(working_submatrix.col_responsible, MPI_COMM_WORLD);
@@ -169,12 +177,19 @@ int main(int argc, char** argv) {
                 double_dense_matrix sum_result = sum_submatrix_along_rows(working_submatrix);
                 double_dense_matrix alfa_i;
                 if (row_responsible(working_submatrix, world_rank)) {
+                    double aggregation_start_time = MPI_Wtime();
                     aggregate_sum_results(sum_result, row_process_list, MPI_COMM_WORLD);
+                    average_distribution_aggregation_time += MPI_Wtime() - aggregation_start_time;
+                    if (idx_iterations == 1 && world_rank == 0) {
+                        printf("First average_distribution_aggregation_time: %lf\n", average_distribution_aggregation_time);
+                    }
                     // last_w_axis_sum[last_w_axis_sum < sys.float_info.epsilon] = 1.0
                     set_to_one_less_than_epsilon(sum_result);
                     // alfa_i = cbg_marginals_u / last_w_axis_sum
                     alfa_i = elementwise_division(poi_marginals_at_hour_responsible, sum_result);
+                    double distribution_start_time = MPI_Wtime();
                     distribute_dense_matrix_to_processes(alfa_i, row_process_list, MPI_COMM_WORLD);
+                    average_distribution_aggregation_time += MPI_Wtime() - distribution_start_time;
                 } else {
                     send_sum_results(sum_result, working_submatrix.row_responsible, MPI_COMM_WORLD);
                     alfa_i = receive_double_dense_matrix(working_submatrix.row_responsible, MPI_COMM_WORLD);
@@ -226,6 +241,7 @@ int main(int argc, char** argv) {
     if (world_rank == 0) {
         printf("Average time per hour: %f\n", average_per_hour / hours);
         printf("Average saving time per hour: %f\n", average_saving_operations / hours);
+        printf("Average aggregation distribution time per hour: %f\n", average_distribution_aggregation_time / hours);
     }
     
     clean_submatrix(&submatrix_to_elaborate);
