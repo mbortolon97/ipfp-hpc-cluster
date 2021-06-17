@@ -1,7 +1,7 @@
 # [HPC Project] High performance IPFP
 
 This repository contain an implementation of the **Iterative Proportional Fitting Procedure** (IPFP) which can be run on large HPC cluster.
-This implementation is thought to speed-up the the IPFP step used by [Albani et al.](https://www.nature.com/articles/s41598-021-88281-w#citeas), where they use this algorithm to forecast how many people will frequent a **point of interest** (eg. restaurants, shops, ...) in a given hour of the day.
+This implementation is thought to speed-up the the IPFP step used by [Chang et al.](https://www.nature.com/articles/s41586-020-2923-3), where they use this algorithm to forecast how many people will frequent a **point of interest** (eg. restaurants, shops, ...) in a given hour of the day.
 
 ### Useful Links
 
