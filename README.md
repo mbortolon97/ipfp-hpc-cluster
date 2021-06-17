@@ -5,7 +5,7 @@ This implementation is thought to speed-up the the IPFP step used by [Albani et 
 
 ### Useful Links
 
-- ...
+- resources : [google drive folder](https://drive.google.com/drive/folders/1l0M-Kd9Mqq0Dy5ns5Z3sh17xlMcemMrd?usp=sharing)
 
 ### How to run the code
 
