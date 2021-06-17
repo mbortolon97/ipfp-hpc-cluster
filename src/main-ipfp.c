@@ -77,7 +77,8 @@ int main(int argc, char** argv) {
         // permute and get partitions
         permutation = create_sparse_matrix_random_permutation(aggregate_visit_matrix);
         permutated_aggregate_visit_matrix = permutate_double_sparse_matrix(permutation, aggregate_visit_matrix);
-        partition = create_submatrix_partition(world_size, permutated_aggregate_visit_matrix.n_rows, permutated_aggregate_visit_matrix.n_cols);
+        partition = create_submatrix_partition_with_given_submatrix_size(world_size, permutated_aggregate_visit_matrix.n_rows, permutated_aggregate_visit_matrix.n_cols, world_size, 1);
+        // partition = create_submatrix_partition(world_size, permutated_aggregate_visit_matrix.n_rows, permutated_aggregate_visit_matrix.n_cols);
         permutation_time = MPI_Wtime() - t_start_permutation_operations;
         printf("permutation_time: %f\n", permutation_time);
 
