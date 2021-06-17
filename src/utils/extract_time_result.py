@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-dir_path = "/home/matteo/uniTN/hpc/results_new"
+dir_path = "/home/matteo/uniTN/hpc/results_only_rows"
 
 id = []
 number_of_processes = []
