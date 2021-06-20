@@ -129,11 +129,17 @@ submatrix wait_for_sparse_matrix(){
 
     // initialize submatrix
     MPI_Recv( infos , 7 , MPI_INT , 0 , 0 , MPI_COMM_WORLD , &status);
+    if (status.MPI_ERROR != MPI_SUCCESS){
+        printf("error while receiving sizes_of_submatrix from process %d\n", status.MPI_SOURCE);
+    }
     my_submatrix = create_empty_submatrix(infos);
 
     // add elements to the queue
     build_mpi_tuple(&mpi_tuple);
     MPI_Recv( my_submatrix.elements , my_submatrix.n_elements , mpi_tuple , 0 , 0 , MPI_COMM_WORLD , &status);
+    if (status.MPI_ERROR != MPI_SUCCESS){
+        printf("error while receiving data_on_submatrix from process %d\n", status.MPI_SOURCE);
+    }
 
     int i;
     for (i = 0; i < my_submatrix.n_elements; i++) {
