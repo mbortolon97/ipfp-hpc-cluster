@@ -45,6 +45,10 @@ typedef struct submatrix_partition_struct {
     int* cols_responsible;
 } submatrix_partition;
 
+/**
+ * This function returns a submatrix partition, which is an assignment of what submatrix will be handled by each process given the number of submatrix to use
+ **/ 
+submatrix_partition create_submatrix_partition_with_given_submatrix_size(int n_processes, int n_rows, int n_cols, int subp_rows, int subp_cols);
 
 /**
  * This function returns a submatrix partition, which is an assignment of what submatrix will be handled by each process 
@@ -68,5 +72,10 @@ static inline bool check_if_inside_submatrix(submatrix_assignment assignment, in
  * if it is, kills the last process (which won't be used)
  **/
 bool check_number_of_processes(int* world_size, int* world_rank);
+
+/**
+ * This function print the submatrix partition
+ **/
+void print_submatrix(const submatrix_partition partition);
 
 #endif

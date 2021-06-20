@@ -86,7 +86,13 @@ submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse
             }
         }
         if (p==0){
-            process_0_submatrix = create_empty_submatrix(infos); //// TO BE DONE
+            process_0_submatrix.start_row = infos[0];
+            process_0_submatrix.stop_row = infos[1];
+            process_0_submatrix.start_col = infos[2];
+            process_0_submatrix.stop_col = infos[3];
+            process_0_submatrix.n_elements = infos[4];
+            process_0_submatrix.col_responsible = infos[5];
+            process_0_submatrix.row_responsible = infos[6];
             process_0_submatrix.elements = mpi_data;
         }else{
             MPI_Send( infos , 7 , MPI_INT , p , 0 , MPI_COMM_WORLD);
@@ -94,7 +100,7 @@ submatrix distribute_sparse_matrix(submatrix_partition *partition, double_sparse
             free(mpi_data);
         }
     }    
-    MPI_Type_free(mpi_tuple);
+    MPI_Type_free(&mpi_tuple);
     return process_0_submatrix;
 }
 
@@ -146,7 +152,7 @@ submatrix wait_for_sparse_matrix(){
         my_submatrix.elements[i].row -= my_submatrix.start_row;
         my_submatrix.elements[i].col -= my_submatrix.start_col;
     }
-    MPI_Type_free(mpi_tuple);
+    MPI_Type_free(&mpi_tuple);
     return my_submatrix;
 }
 
@@ -210,7 +216,7 @@ void send_submatrices(submatrix working_submatrix){
         working_submatrix.elements[i].col += working_submatrix.start_col;
     }
     MPI_Send( working_submatrix.elements , working_submatrix.n_elements+1 , mpi_tuple , 0 , 0 , MPI_COMM_WORLD);
-    MPI_Type_free(mpi_tuple);
+    MPI_Type_free(&mpi_tuple);
 }
 
 double_sparse_matrix group_submatrices(submatrix working_submatrix, double_sparse_matrix* original_matrix, const int n_processes, const int n_elements_biggest_sumbatrix){
@@ -246,7 +252,7 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
         // add element to results;
     }
     free(buffer);
-    MPI_Type_free(mpi_tuple);
+    MPI_Type_free(&mpi_tuple);
     return results;
 }
 

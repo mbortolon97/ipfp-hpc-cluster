@@ -63,3 +63,5 @@ data/
 .vscode
 
 build/
+
+.ipynb_checkpoints

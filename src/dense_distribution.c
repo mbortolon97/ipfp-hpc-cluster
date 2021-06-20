@@ -99,6 +99,10 @@ double_dense_matrix receive_double_dense_matrix(int source, MPI_Comm comm) {
     int dimension[2];
     MPI_Recv(dimension, 2, MPI_INT, source, SEND_DENSE_MATRIX_DIMENSION, comm, &status);
     double_dense_matrix result_matrix = create_double_dense_matrix(dimension[0], dimension[1]);
+    int i;
+    for (i = 0; i < dimension[0] * dimension[1]; i++) {
+        result_matrix.matrix[i] = 0.0;
+    }
     MPI_Recv(result_matrix.matrix, dimension[0] * dimension[1], MPI_DOUBLE, source, SEND_DENSE_MATRIX_CONTENT, comm, &status);
     return result_matrix;
 }

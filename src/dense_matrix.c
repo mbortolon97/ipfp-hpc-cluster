@@ -13,7 +13,7 @@ double_dense_matrix create_double_dense_matrix(int n_rows, int n_cols) {
     matrix.n_rows = n_rows;
     matrix.n_cols = n_cols;
     matrix.matrix = malloc(n_rows * n_cols * sizeof(double));
-
+    
     return matrix;
 }
 
@@ -47,10 +47,12 @@ void set_to_one_less_than_epsilon(double_dense_matrix matrix) {
     int i, j;
     for (i = 0; i < matrix.n_rows; i++) {
         for (j = 0; j < matrix.n_cols; j++) {
+            /**
             if (matrix.matrix[i * matrix.n_cols + j] < FLT_EPSILON) {
                 matrix.matrix[i * matrix.n_cols + j] = 1.0;
             }
-            // matrix.matrix[i * matrix.n_cols + j] = (matrix.matrix[i * matrix.n_cols + j] < DBL_EPSILON) * 1.0 + (matrix.matrix[i * matrix.n_cols + j] > DBL_EPSILON) * matrix.matrix[i * matrix.n_cols + j];
+            **/
+            matrix.matrix[i * matrix.n_cols + j] = (matrix.matrix[i * matrix.n_cols + j] < FLT_EPSILON) * 1.0 + (matrix.matrix[i * matrix.n_cols + j] > FLT_EPSILON) * matrix.matrix[i * matrix.n_cols + j];
         }
     }
 }

@@ -38,7 +38,7 @@ sparse_matrix_permutation create_sparse_matrix_random_permutation(const double_s
         permutation.col_permutations[i] = permutation.col_permutations[j];
         permutation.col_permutations[j] = tmp;
     }
-    for (i = 0; i < matrix.n_rows; i++) {
+    for (i = 0; i < matrix.n_cols; i++) {
         permutation.inverse_col_permutations[permutation.col_permutations[i]] = i;
     }
 
