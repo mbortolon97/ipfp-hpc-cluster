@@ -240,7 +240,7 @@ double_sparse_matrix group_submatrices(submatrix working_submatrix, double_spars
     // receive results from the other processes
     for (i = 1; i< n_processes; i++){
         j = 0;
-        MPI_Recv( buffer , n_elements_biggest_sumbatrix+1 , mpi_tuple , i , 0 , MPI_COMM_WORLD , &status);
+        MPI_Recv( buffer , n_elements_biggest_sumbatrix+1 , mpi_tuple , MPI_ANY_SOURCE , 0 , MPI_COMM_WORLD , &status);
 
         while (buffer[j].row!=-1){
             results.rows[index] = buffer[j].row;
